@@ -2,7 +2,12 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f19" id="meta-theme-color">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TaskFlow">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="description" content="TaskFlow - A modern, high-performance To-Do and Task Management web application featuring glassmorphism design, priority filters, smart categories, subtasks, and instant local persistence.">
   <meta name="keywords" content="todo list, task manager, productivity app, todo app, task tracker">
   <meta name="author" content="TaskFlow Productivity">
@@ -474,6 +479,7 @@
   <!-- Edit Task Modal -->
   <div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
     <div class="modal-dialog glass-card">
+      <div class="sheet-drag-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <h3 id="edit-modal-title" class="modal-title">Edit Task Details</h3>
         <button id="close-modal-btn" class="icon-button close-btn" aria-label="Close dialog">✕</button>
@@ -549,6 +555,14 @@
 
   <!-- Toast Notification System -->
   <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+  <!-- Floating Action Button for Mobile Quick Task Add -->
+  <button id="mobile-add-fab" class="mobile-add-fab hidden-fab" aria-label="Add New Task" title="Create New Task">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </button>
 
   <script src="app.js"></script>
 </body>

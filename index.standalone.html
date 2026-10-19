@@ -2,7 +2,12 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f19" id="meta-theme-color">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TaskFlow">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="description" content="TaskFlow - A modern, high-performance To-Do and Task Management web application featuring glassmorphism design, priority filters, smart categories, subtasks, and instant local persistence.">
   <meta name="keywords" content="todo list, task manager, productivity app, todo app, task tracker">
   <meta name="author" content="TaskFlow Productivity">
@@ -62,6 +67,13 @@
   --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Mobile & Safe Area Tokens */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --touch-min-height: 44px;
 }
 
 /* ==========================================================================
@@ -129,6 +141,11 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, input, select, textarea, a, [role="tab"], .custom-checkbox-btn, .task-action-btn, .subtask-item {
+  touch-action: manipulation;
 }
 
 html {
@@ -1832,63 +1849,455 @@ body {
   50% { opacity: 0.6; }
 }
 
+@keyframes slideUpSheet {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Base Sheet Handle & Mobile FAB Defaults */
+.sheet-drag-handle {
+  display: none;
+}
+
+.mobile-add-fab {
+  display: none;
+}
+
 /* Utility Hidden */
 .hidden {
   display: none !important;
 }
 
 /* ==========================================================================
-   Responsive Breakpoints
+   Responsive Design System & Breakpoints
+   Supports Mobile Phones (320px-480px), Phablets & Tablets (481px-1024px),
+   Laptops & Desktops (>1024px)
    ========================================================================== */
-@media (max-width: 900px) {
-  .stats-grid {
-    grid-template-columns: 1fr 1fr;
+
+/* Touch Device Specific Enhancements (No-hover fallback) */
+@media (hover: none) and (pointer: coarse), (pointer: coarse) {
+  .task-actions {
+    opacity: 1 !important;
   }
-  .progress-card {
-    grid-column: span 2;
+
+  .task-action-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-surface);
+  }
+
+  .custom-checkbox-btn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .subtask-item {
+    min-height: 40px;
+    padding: 0.45rem 0.65rem;
+    cursor: pointer;
+  }
+
+  .subtask-checkbox {
+    width: 20px;
+    height: 20px;
   }
 }
 
-@media (max-width: 680px) {
+/* Input Anti-Zoom on Mobile Devices (Prevents iOS auto-zoom on input focus) */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="date"],
+  textarea,
+  select,
+  .main-text-input,
+  .form-select,
+  .form-date-input,
+  .modal-text-input,
+  .form-textarea,
+  .subtask-input {
+    font-size: 16px !important;
+  }
+}
+
+/* --- Breakpoint: Laptops & Tablets (max-width: 1024px) --- */
+@media (max-width: 1024px) {
   .app-container {
-    padding: 1.25rem 1rem 2.5rem;
+    max-width: 95%;
+    padding: 1.75rem 1.25rem 2.5rem;
+    gap: 1.5rem;
   }
 
   .stats-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
+    gap: 0.85rem;
+  }
+
+  .stat-card {
+    padding: 0.85rem 1rem;
     gap: 0.75rem;
   }
 
+  .stat-number {
+    font-size: 1.35rem;
+  }
+}
+
+/* --- Breakpoint: Tablet Portrait (max-width: 860px) --- */
+@media (max-width: 860px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+  }
+
   .progress-card {
-    grid-column: span 2;
+    grid-column: 1 / -1;
+    padding: 1.15rem 1.35rem;
+  }
+
+  .controls-top-row {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .search-box {
+    min-width: 240px;
+  }
+}
+
+/* --- Breakpoint: Mobile Phones & Phablets (max-width: 680px) --- */
+@media (max-width: 680px) {
+  /* Layout & Container */
+  .app-container {
+    max-width: 100%;
+    padding: 1.15rem 0.95rem calc(2rem + var(--safe-bottom));
+    gap: 1.15rem;
+  }
+
+  /* Optimized Glow Background Orbs for Mobile GPU & Battery */
+  .glow-orb {
+    filter: blur(55px);
+    opacity: 0.65;
+  }
+  .orb-1 { width: 280px; height: 280px; top: -60px; }
+  .orb-2 { width: 260px; height: 260px; bottom: 0; }
+  .orb-3 { width: 220px; height: 220px; top: 45%; }
+
+  /* Header Optimization */
+  .app-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .header-brand {
+    gap: 0.65rem;
+  }
+
+  .brand-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+  }
+
+  .brand-logo svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .brand-title {
+    font-size: 1.45rem;
+    line-height: 1.1;
+  }
+
+  .brand-greeting {
+    font-size: 0.8rem;
+    line-height: 1.25;
+    margin-top: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 210px;
+  }
+
+  .header-actions {
+    gap: 0.4rem;
+  }
+
+  .date-badge {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.75rem;
+    gap: 0.35rem;
+  }
+
+  .icon-button {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+  }
+
+  .dropdown-menu {
+    max-width: calc(100vw - 2rem);
+    right: 0;
+  }
+
+  /* Productivity Dashboard Stats Grid */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+
+  .progress-card {
+    grid-column: 1 / -1;
+    padding: 0.95rem 1.1rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .progress-percent {
+    font-size: 1.45rem;
+  }
+
+  .stat-card {
+    padding: 0.75rem 0.8rem;
+    gap: 0.65rem;
+    border-radius: var(--radius-md);
+    min-width: 0;
+  }
+
+  .stat-icon-wrapper {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+  }
+
+  .stat-icon-wrapper svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .stat-number {
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+
+  .stat-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Task Creator Panel */
+  .task-creator-panel {
+    padding: 1.1rem 1rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .task-form {
+    gap: 0.85rem;
   }
 
   .form-main-row {
     flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .input-wrapper {
+    width: 100%;
+  }
+
+  .main-text-input {
+    height: 48px;
+    padding: 0 3.2rem 0 2.75rem;
+    border-radius: var(--radius-md);
+  }
+
+  .input-icon {
+    left: 0.95rem;
+  }
+
+  .input-voice-btn {
+    right: 0.65rem;
+    width: 36px;
+    height: 36px;
   }
 
   .primary-gradient-btn {
     width: 100%;
+    height: 48px;
+    font-size: 0.98rem;
+    border-radius: var(--radius-md);
+    justify-content: center;
+  }
+
+  /* Form Options 2-Column Responsive Grid */
+  .form-options-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    width: 100%;
+    padding-top: 0;
+  }
+
+  .form-option-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    width: 100%;
+  }
+
+  .option-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .custom-select-wrapper,
+  .date-input-wrapper {
+    width: 100%;
+  }
+
+  .form-select,
+  .form-date-input {
+    width: 100%;
+    height: 42px;
+    padding: 0.5rem 0.65rem;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Due Date & Details Toggle Span Full Width */
+  .form-options-bar > .form-option-group:nth-child(3) {
+    grid-column: span 2;
   }
 
   .text-pill-btn {
+    grid-column: span 2;
     margin-left: 0;
     width: 100%;
+    height: 42px;
     justify-content: center;
+    font-size: 0.84rem;
+    border-radius: var(--radius-pill);
+    background: var(--bg-surface);
+  }
+
+  /* Collapsible Advanced Area */
+  .advanced-fields {
+    padding: 0.85rem;
+    gap: 0.65rem;
+    border-radius: var(--radius-md);
+  }
+
+  .subtask-add-row {
+    flex-direction: row;
+    gap: 0.45rem;
+  }
+
+  .subtask-input {
+    height: 40px;
+    padding: 0.45rem 0.65rem;
+  }
+
+  .small-btn {
+    height: 40px;
+    padding: 0 0.85rem;
+    white-space: nowrap;
+  }
+
+  /* Task Feed Section Controls */
+  .feed-controls {
+    padding: 0.95rem;
+    border-radius: var(--radius-lg);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
   }
 
   .controls-top-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .search-box {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-box input {
+    height: 44px;
+    padding-left: 2.5rem;
+    padding-right: 2.4rem;
+    border-radius: var(--radius-md);
+  }
+
+  .keyboard-hint {
+    display: none !important;
+  }
+
+  .clear-input-btn {
+    right: 0.75rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
   }
 
   .sort-selector-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: 0.5rem;
   }
 
+  .sort-label {
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .inline-select {
+    flex: 1;
+    height: 42px;
+    width: auto;
+  }
+
+  /* Filters Row: Smooth Horizontal Pill Swiping */
   .filters-pills-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+    padding-top: 0.65rem;
+  }
+
+  .filter-status-pills {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.45rem;
+    padding: 0.25rem 0.15rem 0.45rem;
+    margin: 0 -0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    scroll-snap-type: x proximity;
+  }
+
+  .filter-status-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-tab {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    white-space: nowrap;
+    height: 38px;
+    padding: 0 0.85rem;
+    font-size: 0.82rem;
   }
 
   .category-filter-wrapper {
@@ -1897,24 +2306,370 @@ body {
 
   .category-filter-select {
     width: 100%;
+    height: 42px;
+    font-size: 16px;
   }
 
-  .task-meta-row, .subtasks-wrapper {
+  /* Bulk Actions Toolbar */
+  .bulk-actions-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+    padding-top: 0.5rem;
+  }
+
+  .bulk-status-info {
+    text-align: left;
+    font-size: 0.78rem;
+  }
+
+  .bulk-btn-group {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .export-dropdown-wrapper {
+    width: 100%;
+    justify-content: center;
+    height: 38px;
+  }
+
+  .export-btn {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.78rem;
+    padding: 0 0.4rem;
+  }
+
+  .export-toggle-btn {
+    padding: 0 0.5rem;
+  }
+
+  .export-quick-menu {
+    left: 0;
+    right: auto;
+    min-width: 240px;
+    max-width: calc(100vw - 2rem);
+  }
+
+  #mark-all-done-btn,
+  #clear-completed-btn {
+    height: 38px;
+    justify-content: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    padding: 0 0.45rem;
+  }
+
+  /* Task Cards & List */
+  .task-item {
+    padding: 0.95rem 1rem;
+    gap: 0.65rem;
+    border-radius: var(--radius-md);
+  }
+
+  .task-row-main {
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .custom-checkbox-btn {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    margin-top: 1px;
+    border-radius: 7px;
+  }
+
+  .task-title {
+    font-size: 0.98rem;
+    line-height: 1.38;
+  }
+
+  .task-notes-preview {
+    font-size: 0.82rem;
+    line-height: 1.4;
+    margin-top: 0.25rem;
+  }
+
+  .task-actions {
+    opacity: 1 !important;
+    gap: 0.25rem;
+  }
+
+  .task-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+  }
+
+  .task-meta-row {
     padding-left: 0;
+    gap: 0.35rem;
+  }
+
+  .badge-pill {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .subtasks-wrapper {
+    padding-left: 0;
+    margin-top: 0.15rem;
+  }
+
+  .subtasks-toggle-btn {
+    height: 34px;
+    padding: 0 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  .subtask-item {
+    min-height: 38px;
+    padding: 0.35rem 0.5rem;
+  }
+
+  /* Edit Modal Mobile Bottom Sheet Transformation */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.72);
+  }
+
+  .modal-dialog {
+    max-width: 100%;
+    width: 100%;
+    max-height: 90vh;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    padding: 1.25rem 1.25rem calc(1.25rem + var(--safe-bottom));
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.65);
+    animation: slideUpSheet 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sheet-drag-handle {
+    display: block;
+    width: 44px;
+    height: 5px;
+    background: var(--border-medium);
+    border-radius: 3px;
+    margin: -0.5rem auto 1rem;
+  }
+
+  .modal-header {
+    margin-bottom: 0.95rem;
+    padding-bottom: 0.65rem;
+  }
+
+  .modal-title {
+    font-size: 1.15rem;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+
+  .modal-text-input,
+  .modal-body .form-select,
+  .modal-body .form-date-input {
+    height: 42px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.65rem;
+    margin-top: 0.75rem;
+    padding-top: 0.85rem;
+  }
+
+  .modal-actions button {
+    flex: 1;
+    height: 46px;
+    font-size: 0.95rem;
+    justify-content: center;
+  }
+
+  /* Toast Notification Full-Width Mobile Banner */
+  .toast-container {
+    bottom: calc(1rem + var(--safe-bottom));
+    left: 1rem;
+    right: 1rem;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .toast {
+    min-width: 0;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    border-radius: var(--radius-md);
+  }
+
+  /* Floating Action Button (FAB) for Mobile Quick Task Add */
+  .mobile-add-fab {
+    display: flex;
+    position: fixed;
+    bottom: calc(1.25rem + var(--safe-bottom));
+    right: 1.25rem;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-500), var(--accent-cyan));
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    cursor: pointer;
+    transition: transform var(--transition-bounce), opacity var(--transition-fast);
+  }
+
+  .mobile-add-fab:active {
+    transform: scale(0.92);
+  }
+
+  .mobile-add-fab svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .mobile-add-fab.hidden-fab {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.75) translateY(20px);
+  }
+
+  /* Footer on Mobile */
+  .app-footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.65rem;
+    padding-bottom: max(1rem, var(--safe-bottom));
+  }
+
+  .footer-shortcuts {
+    display: none !important;
+  }
+
+  .footer-credit {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+}
+
+/* --- Breakpoint: Small Mobile Screens (max-width: 480px) --- */
+@media (max-width: 480px) {
+  .brand-greeting {
+    display: none;
+  }
+
+  .date-badge span {
+    font-size: 0.72rem;
+  }
+
+  .stats-grid {
+    gap: 0.55rem;
+  }
+
+  .stat-card {
+    padding: 0.7rem 0.65rem;
+    gap: 0.5rem;
+  }
+
+  .stat-icon-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  .stat-number {
+    font-size: 1.18rem;
+  }
+
+  .stat-label {
+    font-size: 0.66rem;
+  }
+
+  .bulk-btn-group {
+    grid-template-columns: 1fr;
   }
 
   .form-row-2 {
     grid-template-columns: 1fr;
   }
 
-  .app-footer {
+  .subtask-add-row {
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+  }
+
+  .small-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 
-</style>
+/* --- Breakpoint: Ultra-compact Mobile (max-width: 360px) --- */
+@media (max-width: 360px) {
+  .app-container {
+    padding: 0.85rem 0.6rem calc(1.75rem + var(--safe-bottom));
+  }
+
+  .brand-title {
+    font-size: 1.25rem;
+  }
+
+  .date-badge {
+    padding: 0.35rem 0.55rem;
+  }
+
+  .icon-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .stats-grid {
+    gap: 0.45rem;
+  }
+
+  .stat-card {
+    padding: 0.6rem 0.5rem;
+    gap: 0.45rem;
+  }
+
+  .stat-icon-wrapper {
+    width: 32px;
+    height: 32px;
+  }
+
+  .stat-icon-wrapper svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .stat-number {
+    font-size: 1.1rem;
+  }
+
+  .task-actions {
+    gap: 0.15rem;
+  }
+
+  .task-action-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+  </style>
 </head>
 <body>
   <!-- Canvas for celebratory particle confetti -->
@@ -2375,6 +3130,7 @@ body {
   <!-- Edit Task Modal -->
   <div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
     <div class="modal-dialog glass-card">
+      <div class="sheet-drag-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <h3 id="edit-modal-title" class="modal-title">Edit Task Details</h3>
         <button id="close-modal-btn" class="icon-button close-btn" aria-label="Close dialog">✕</button>
@@ -2450,6 +3206,14 @@ body {
 
   <!-- Toast Notification System -->
   <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+  <!-- Floating Action Button for Mobile Quick Task Add -->
+  <button id="mobile-add-fab" class="mobile-add-fab hidden-fab" aria-label="Add New Task" title="Create New Task">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </button>
 
   <script>
 /**
@@ -2608,6 +3372,8 @@ body {
   const markAllDoneBtn = document.getElementById('mark-all-done-btn');
   const clearCompletedBtn = document.getElementById('clear-completed-btn');
   const emptyAddBtn = document.getElementById('empty-add-btn');
+  const mobileAddFab = document.getElementById('mobile-add-fab');
+  const metaThemeColor = document.getElementById('meta-theme-color');
 
   // Edit Modal Elements
   const editModal = document.getElementById('edit-modal');
@@ -2843,6 +3609,9 @@ body {
     try {
       localStorage.setItem('taskflow_theme', theme);
     } catch {}
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#0b0f19' : '#f1f5f9');
+    }
     if (theme === 'dark') {
       themeIconSun.classList.add('hidden');
       themeIconMoon.classList.remove('hidden');
@@ -4524,6 +5293,41 @@ body {
   // --- Setup Event Listeners ---
   themeToggleBtn.addEventListener('click', toggleTheme);
   soundToggleBtn.addEventListener('click', toggleSound);
+
+  // --- Mobile Quick Add FAB Handling ---
+  if (mobileAddFab) {
+    mobileAddFab.addEventListener('click', () => {
+      if (newTaskForm) {
+        newTaskForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          if (taskTitleInput) taskTitleInput.focus();
+        }, 320);
+      }
+    });
+
+    if ('IntersectionObserver' in window && newTaskForm) {
+      const fabObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            mobileAddFab.classList.add('hidden-fab');
+          } else {
+            mobileAddFab.classList.remove('hidden-fab');
+          }
+        });
+      }, { threshold: 0.15 });
+      fabObserver.observe(newTaskForm);
+    } else {
+      window.addEventListener('scroll', () => {
+        if (!newTaskForm) return;
+        const rect = newTaskForm.getBoundingClientRect();
+        if (rect.bottom < 60) {
+          mobileAddFab.classList.remove('hidden-fab');
+        } else {
+          mobileAddFab.classList.add('hidden-fab');
+        }
+      }, { passive: true });
+    }
+  }
 
   // --- Initialization ---
   loadPersistedData();

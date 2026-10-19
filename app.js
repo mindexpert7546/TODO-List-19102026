@@ -154,6 +154,8 @@
   const markAllDoneBtn = document.getElementById('mark-all-done-btn');
   const clearCompletedBtn = document.getElementById('clear-completed-btn');
   const emptyAddBtn = document.getElementById('empty-add-btn');
+  const mobileAddFab = document.getElementById('mobile-add-fab');
+  const metaThemeColor = document.getElementById('meta-theme-color');
 
   // Edit Modal Elements
   const editModal = document.getElementById('edit-modal');
@@ -389,6 +391,9 @@
     try {
       localStorage.setItem('taskflow_theme', theme);
     } catch {}
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#0b0f19' : '#f1f5f9');
+    }
     if (theme === 'dark') {
       themeIconSun.classList.add('hidden');
       themeIconMoon.classList.remove('hidden');
@@ -2070,6 +2075,41 @@
   // --- Setup Event Listeners ---
   themeToggleBtn.addEventListener('click', toggleTheme);
   soundToggleBtn.addEventListener('click', toggleSound);
+
+  // --- Mobile Quick Add FAB Handling ---
+  if (mobileAddFab) {
+    mobileAddFab.addEventListener('click', () => {
+      if (newTaskForm) {
+        newTaskForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          if (taskTitleInput) taskTitleInput.focus();
+        }, 320);
+      }
+    });
+
+    if ('IntersectionObserver' in window && newTaskForm) {
+      const fabObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            mobileAddFab.classList.add('hidden-fab');
+          } else {
+            mobileAddFab.classList.remove('hidden-fab');
+          }
+        });
+      }, { threshold: 0.15 });
+      fabObserver.observe(newTaskForm);
+    } else {
+      window.addEventListener('scroll', () => {
+        if (!newTaskForm) return;
+        const rect = newTaskForm.getBoundingClientRect();
+        if (rect.bottom < 60) {
+          mobileAddFab.classList.remove('hidden-fab');
+        } else {
+          mobileAddFab.classList.add('hidden-fab');
+        }
+      }, { passive: true });
+    }
+  }
 
   // --- Initialization ---
   loadPersistedData();
