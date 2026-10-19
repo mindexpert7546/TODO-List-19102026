@@ -1174,11 +1174,15 @@ body {
   font-size: 0.78rem;
   color: var(--text-dim);
   padding-top: 0.25rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .bulk-btn-group {
   display: flex;
+  align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .subtle-link-btn {
@@ -1201,6 +1205,64 @@ body {
 
 .subtle-link-btn.text-danger:hover {
   color: var(--accent-rose);
+}
+
+/* Export to Excel & Dropdown Menu */
+.export-dropdown-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.export-dropdown-wrapper:hover {
+  background: rgba(99, 102, 241, 0.16);
+  border-color: rgba(99, 102, 241, 0.45);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.18);
+}
+
+.export-btn {
+  color: var(--primary-400);
+  padding: 0.24rem 0.55rem;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.export-btn:hover {
+  color: #fff;
+}
+
+.export-toggle-btn {
+  color: var(--primary-400);
+  padding: 0.24rem 0.4rem;
+  border-left: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  cursor: pointer;
+}
+
+.export-toggle-btn:hover {
+  background: rgba(99, 102, 241, 0.25);
+  color: #fff;
+}
+
+.export-quick-menu {
+  min-width: 255px;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 120;
+}
+
+.menu-badge {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-left: auto;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  font-weight: 600;
 }
 
 /* ==========================================================================
