@@ -1,0 +1,3754 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TaskFlow - A modern, high-performance To-Do and Task Management web application featuring glassmorphism design, priority filters, smart categories, subtasks, and instant local persistence.">
+  <meta name="keywords" content="todo list, task manager, productivity app, todo app, task tracker">
+  <meta name="author" content="TaskFlow Productivity">
+  <title>TaskFlow &mdash; Premium Task &amp; Productivity Manager</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+/* ==========================================================================
+   TaskFlow Design System & Core Styles
+   Modern Glassmorphism & High-Productivity Interface
+   ========================================================================== */
+
+:root {
+  /* Fonts */
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Universal Color Accents */
+  --primary-500: #6366f1;
+  --primary-600: #4f46e5;
+  --primary-400: #818cf8;
+  --accent-cyan: #06b6d4;
+  --accent-teal: #14b8a6;
+  --accent-pink: #ec4899;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+
+  /* Priority Badges */
+  --priority-high: #f43f5e;
+  --priority-high-bg: rgba(244, 63, 94, 0.14);
+  --priority-medium: #f59e0b;
+  --priority-medium-bg: rgba(245, 158, 11, 0.14);
+  --priority-low: #10b981;
+  --priority-low-bg: rgba(16, 185, 129, 0.14);
+
+  /* Categories Color Palette */
+  --cat-work: #6366f1;
+  --cat-personal: #ec4899;
+  --cat-study: #06b6d4;
+  --cat-health: #10b981;
+  --cat-finance: #f59e0b;
+  --cat-creative: #8b5cf6;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ==========================================================================
+   Dark Theme (Default)
+   ========================================================================== */
+[data-theme="dark"] {
+  --bg-app: #0b0f19;
+  --bg-card: rgba(17, 24, 39, 0.72);
+  --bg-card-hover: rgba(26, 36, 56, 0.85);
+  --bg-surface: rgba(30, 41, 59, 0.65);
+  --bg-input: rgba(15, 23, 42, 0.75);
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.16);
+  --border-active: rgba(99, 102, 241, 0.6);
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --text-inverse: #0b0f19;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.35);
+
+  --orb-1: rgba(99, 102, 241, 0.18);
+  --orb-2: rgba(6, 182, 212, 0.14);
+  --orb-3: rgba(236, 72, 153, 0.12);
+}
+
+/* ==========================================================================
+   Light Theme
+   ========================================================================== */
+[data-theme="light"] {
+  --bg-app: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.82);
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+  --bg-surface: rgba(241, 245, 249, 0.8);
+  --bg-input: #ffffff;
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-medium: rgba(0, 0, 0, 0.14);
+  --border-active: rgba(99, 102, 241, 0.7);
+
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #94a3b8;
+  --text-inverse: #ffffff;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 10px 25px -5px rgba(100, 116, 139, 0.12), 0 4px 6px -4px rgba(100, 116, 139, 0.08);
+  --shadow-lg: 0 20px 35px -8px rgba(100, 116, 139, 0.18);
+  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.2);
+
+  --orb-1: rgba(99, 102, 241, 0.12);
+  --orb-2: rgba(6, 182, 212, 0.1);
+  --orb-3: rgba(236, 72, 153, 0.08);
+}
+
+/* ==========================================================================
+   CSS Reset & Base
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Confetti Canvas Overlay */
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Ambient Animated Glow Background */
+.app-background {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.8;
+  animation: floatOrb 18s ease-in-out infinite alternate;
+}
+
+.orb-1 {
+  width: 500px;
+  height: 500px;
+  background: var(--orb-1);
+  top: -120px;
+  left: 10%;
+  animation-duration: 22s;
+}
+
+.orb-2 {
+  width: 450px;
+  height: 450px;
+  background: var(--orb-2);
+  bottom: 5%;
+  right: 5%;
+  animation-duration: 26s;
+}
+
+.orb-3 {
+  width: 350px;
+  height: 350px;
+  background: var(--orb-3);
+  top: 40%;
+  right: 25%;
+  animation-duration: 18s;
+}
+
+@keyframes floatOrb {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, 30px) scale(1.08); }
+  100% { transform: translate(-30px, 50px) scale(0.95); }
+}
+
+/* Layout Container */
+.app-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 2.25rem 1.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* Glassmorphism Card Utility */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.glass-card:hover {
+  border-color: var(--border-medium);
+}
+
+/* ==========================================================================
+   Header Component
+   ========================================================================== */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  padding-bottom: 0.5rem;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.brand-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--primary-500), var(--accent-cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.45);
+  transition: transform var(--transition-bounce);
+}
+
+.brand-logo:hover {
+  transform: rotate(-6deg) scale(1.06);
+}
+
+.brand-logo svg {
+  width: 26px;
+  height: 26px;
+}
+
+.brand-title {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.brand-title span {
+  background: linear-gradient(135deg, var(--primary-400), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-greeting {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+/* Date Badge */
+.date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.date-badge svg {
+  color: var(--primary-400);
+}
+
+/* Icon Buttons */
+.icon-button {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.icon-button:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-main);
+  border-color: var(--border-medium);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.icon-button:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Dropdown Menu */
+.dropdown-wrapper {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 0.5rem;
+  min-width: 190px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  animation: fadeInDown 0.18s ease-out;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.85rem;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  text-align: left;
+  width: 100%;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-surface);
+}
+
+.dropdown-item.text-danger:hover {
+  background: rgba(244, 63, 94, 0.12);
+  color: var(--accent-rose);
+}
+
+.file-label {
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Productivity Stats Dashboard Cards
+   ========================================================================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card.active-stat-card {
+  border-color: var(--primary-400);
+  background: var(--bg-card-hover);
+}
+
+/* Progress Stat Card Special Styling */
+.progress-card {
+  grid-column: span 1;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--bg-card), rgba(99, 102, 241, 0.08));
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+.progress-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+.stat-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.progress-percent {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.stat-subtext {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.progress-bar-track {
+  width: 90%;
+  height: 6px;
+  background: var(--border-subtle);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-top: 0.2rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-500), var(--accent-cyan));
+  border-radius: var(--radius-pill);
+  transition: width 0.5s ease;
+}
+
+/* Circular Progress Indicator */
+.progress-ring-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-bg {
+  color: var(--border-subtle);
+}
+
+.progress-ring-circle {
+  color: var(--primary-400);
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ring-emoji {
+  position: absolute;
+  font-size: 1.25rem;
+}
+
+/* Stat Counter Numbers */
+.stat-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon-wrapper svg {
+  width: 22px;
+  height: 22px;
+}
+
+.total-icon {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--primary-400);
+}
+
+.pending-icon {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan);
+}
+
+.completed-icon {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--accent-emerald);
+}
+
+.urgent-icon {
+  background: rgba(244, 63, 94, 0.12);
+  color: var(--accent-rose);
+}
+
+.stat-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-number {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   Task Creation Panel
+   ========================================================================== */
+.task-creator-panel {
+  padding: 1.35rem 1.5rem;
+  position: relative;
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+}
+
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-main-row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1.1rem;
+  color: var(--text-dim);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.main-text-input {
+  width: 100%;
+  padding: 0.95rem 3.4rem 0.95rem 3rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.main-text-input:focus {
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+.main-text-input::placeholder {
+  color: var(--text-dim);
+}
+
+/* Speech to Text Microphone Button */
+.input-voice-btn {
+  position: absolute;
+  right: 0.75rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  z-index: 2;
+}
+
+.input-voice-btn:hover {
+  background: var(--bg-surface);
+  color: var(--text-main);
+  border-color: var(--border-subtle);
+  transform: scale(1.05);
+}
+
+.input-voice-btn .mic-icon {
+  width: 18px;
+  height: 18px;
+  transition: all var(--transition-fast);
+}
+
+/* Active Listening State */
+.input-voice-btn.is-listening {
+  background: rgba(244, 63, 94, 0.18);
+  color: var(--accent-rose);
+  border-color: rgba(244, 63, 94, 0.5);
+  box-shadow: 0 0 16px rgba(244, 63, 94, 0.5);
+  animation: pulseRecording 1.5s infinite;
+}
+
+.voice-pulse-ring {
+  display: none;
+}
+
+.input-voice-btn.is-listening .voice-pulse-ring {
+  display: block;
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-rose);
+  opacity: 0.8;
+  animation: rippleRing 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes pulseRecording {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes rippleRing {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* Live Voice Status Indicator Bar */
+.voice-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 1rem;
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  border-radius: var(--radius-md);
+  animation: fadeInDown 0.2s ease-out;
+}
+
+.voice-live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-rose);
+  box-shadow: 0 0 8px var(--accent-rose);
+  animation: blinkDot 1s infinite alternate;
+  flex-shrink: 0;
+}
+
+@keyframes blinkDot {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+.voice-status-text {
+  flex: 1;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--accent-rose);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Animated Sound Wave Bars */
+.voice-soundwaves {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+}
+
+.voice-soundwaves span {
+  width: 3px;
+  background: var(--accent-rose);
+  border-radius: 2px;
+  animation: waveBar 0.8s ease-in-out infinite alternate;
+}
+
+.voice-soundwaves span:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+.voice-soundwaves span:nth-child(2) { height: 16px; animation-delay: 0.25s; }
+.voice-soundwaves span:nth-child(3) { height: 10px; animation-delay: 0.4s; }
+.voice-soundwaves span:nth-child(4) { height: 14px; animation-delay: 0.15s; }
+.voice-soundwaves span:nth-child(5) { height: 8px; animation-delay: 0.3s; }
+
+@keyframes waveBar {
+  0% { transform: scaleY(0.4); }
+  100% { transform: scaleY(1.3); }
+}
+
+.voice-stop-btn {
+  background: var(--accent-rose);
+  border: none;
+  color: #ffffff;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.voice-stop-btn:hover {
+  background: #e11d48;
+}
+
+/* Modal Voice Buttons */
+.label-with-voice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.voice-field-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.voice-field-btn:hover {
+  color: var(--accent-rose);
+  border-color: rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.08);
+}
+
+.voice-field-btn.is-listening {
+  color: var(--accent-rose);
+  border-color: var(--accent-rose);
+  background: rgba(244, 63, 94, 0.15);
+  animation: pulseRecording 1.5s infinite;
+}
+
+/* Primary Gradient Button */
+.primary-gradient-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.95rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  transition: all var(--transition-fast);
+}
+
+.primary-gradient-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.primary-gradient-btn:hover {
+  background: linear-gradient(135deg, var(--primary-400), var(--primary-500));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+}
+
+.primary-gradient-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.small-btn {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+}
+
+/* Secondary Button */
+.secondary-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.75rem 1.25rem;
+  transition: all var(--transition-fast);
+}
+
+.secondary-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-medium);
+}
+
+/* Options Bar inside Form */
+.form-options-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.form-option-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.option-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.form-select, .form-date-input {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-sm);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.form-select:focus, .form-date-input:focus {
+  border-color: var(--primary-400);
+}
+
+.text-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: 1px dashed var(--border-medium);
+  color: var(--text-muted);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-left: auto;
+}
+
+.text-pill-btn:hover {
+  color: var(--primary-400);
+  border-color: var(--primary-400);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+/* Collapsible Detailed Notes & Subtask Draft area */
+.advanced-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  animation: fadeInDown 0.2s ease-out;
+}
+
+.form-textarea {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  padding: 0.65rem 0.85rem;
+  resize: vertical;
+  outline: none;
+}
+
+.form-textarea:focus {
+  border-color: var(--primary-400);
+}
+
+.subtask-add-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.subtask-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  padding: 0.45rem 0.75rem;
+  outline: none;
+}
+
+.subtask-input:focus {
+  border-color: var(--primary-400);
+}
+
+.draft-subtasks-list, .edit-subtasks-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+
+.draft-subtask-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.65rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+}
+
+.remove-subtask-btn {
+  background: transparent;
+  border: none;
+  color: var(--accent-rose);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0 0.35rem;
+}
+
+/* ==========================================================================
+   Feed Controls: Search, Filters & Bulk Operations
+   ========================================================================== */
+.feed-controls {
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.controls-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.85rem;
+  width: 17px;
+  height: 17px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.65rem 2.5rem 0.65rem 2.4rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.search-box input:focus {
+  border-color: var(--primary-400);
+  background: var(--bg-input);
+}
+
+.keyboard-hint {
+  position: absolute;
+  right: 0.75rem;
+  background: var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.clear-input-btn {
+  position: absolute;
+  right: 2rem;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.2rem;
+}
+
+.clear-input-btn:hover {
+  color: var(--text-main);
+}
+
+.sort-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.inline-select {
+  padding: 0.45rem 0.65rem;
+}
+
+/* Filter Pills Row */
+.filters-pills-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.filter-status-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all var(--transition-fast);
+}
+
+.filter-tab:hover {
+  background: var(--bg-surface);
+  color: var(--text-main);
+}
+
+.filter-tab.active {
+  background: var(--primary-500);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.filter-tab .badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+}
+
+.filter-tab:not(.active) .badge {
+  background: var(--border-subtle);
+  color: var(--text-dim);
+}
+
+/* Category Filter Dropdown */
+.category-filter-select {
+  padding: 0.4rem 0.75rem;
+  font-weight: 600;
+}
+
+/* Bulk Toolbar */
+.bulk-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  padding-top: 0.25rem;
+}
+
+.bulk-btn-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.subtle-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.subtle-link-btn:hover {
+  color: var(--primary-400);
+}
+
+.subtle-link-btn.text-danger:hover {
+  color: var(--accent-rose);
+}
+
+/* ==========================================================================
+   Task Feed & Task Card Components
+   ========================================================================== */
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.task-item {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  animation: slideInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.task-item:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.task-item.priority-high-border {
+  border-left: 4px solid var(--priority-high);
+}
+
+.task-item.priority-medium-border {
+  border-left: 4px solid var(--priority-medium);
+}
+
+.task-item.priority-low-border {
+  border-left: 4px solid var(--priority-low);
+}
+
+.task-item.task-completed {
+  opacity: 0.65;
+  background: rgba(17, 24, 39, 0.45);
+}
+
+[data-theme="light"] .task-item.task-completed {
+  background: rgba(241, 245, 249, 0.65);
+}
+
+.task-item.task-completed .task-title {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+/* Task Header Row (Checkbox, Title, Quick Actions) */
+.task-row-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.95rem;
+}
+
+/* Custom Interactive Checkbox */
+.custom-checkbox-btn {
+  background: transparent;
+  border: 2px solid var(--border-medium);
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  transition: all var(--transition-bounce);
+  color: #ffffff;
+}
+
+.custom-checkbox-btn:hover {
+  border-color: var(--primary-400);
+  transform: scale(1.1);
+}
+
+.custom-checkbox-btn.checked {
+  background: linear-gradient(135deg, var(--accent-emerald), #059669);
+  border-color: var(--accent-emerald);
+}
+
+.custom-checkbox-btn svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all var(--transition-bounce);
+}
+
+.custom-checkbox-btn.checked svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Title & Description */
+.task-content-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main);
+  word-break: break-word;
+  line-height: 1.35;
+  transition: color var(--transition-fast);
+}
+
+.task-notes-preview {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+/* Task Action Buttons on Right */
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.task-item:hover .task-actions {
+  opacity: 1;
+}
+
+.task-action-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.task-action-btn:hover {
+  background: var(--bg-surface);
+  color: var(--text-main);
+}
+
+.task-action-btn.star-btn.is-starred {
+  color: #eab308;
+}
+
+.task-action-btn.delete-btn:hover {
+  color: var(--accent-rose);
+  background: rgba(244, 63, 94, 0.12);
+}
+
+/* Metadata Footer Row (Category, Priority, Due Date, Subtask Count) */
+.task-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-left: 2.45rem;
+}
+
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.02em;
+}
+
+/* Category Badges */
+.badge-cat-Work { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+.badge-cat-Personal { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+.badge-cat-Study { background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+.badge-cat-Health { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.badge-cat-Finance { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.badge-cat-Creative { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+
+/* Priority Badges */
+.badge-priority-high { background: var(--priority-high-bg); color: var(--priority-high); }
+.badge-priority-medium { background: var(--priority-medium-bg); color: var(--priority-medium); }
+.badge-priority-low { background: var(--priority-low-bg); color: var(--priority-low); }
+
+/* Due Date Status Badges */
+.badge-due {
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+}
+
+.badge-due.is-overdue {
+  background: rgba(244, 63, 94, 0.14);
+  color: var(--accent-rose);
+  border-color: rgba(244, 63, 94, 0.3);
+  animation: pulseLight 2s infinite;
+}
+
+.badge-due.is-today {
+  background: rgba(245, 158, 11, 0.14);
+  color: var(--accent-amber);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+/* Subtasks Progress Accordion in Task Card */
+.subtasks-wrapper {
+  margin-top: 0.25rem;
+  padding-left: 2.45rem;
+}
+
+.subtasks-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.subtasks-toggle-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-main);
+}
+
+.subtasks-toggle-btn svg {
+  transition: transform var(--transition-fast);
+}
+
+.subtasks-toggle-btn.expanded svg {
+  transform: rotate(90deg);
+}
+
+.task-subtasks-drawer {
+  margin-top: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.subtask-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.84rem;
+  color: var(--text-main);
+}
+
+.subtask-checkbox {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--primary-500);
+  cursor: pointer;
+}
+
+.subtask-item.completed span {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+/* ==========================================================================
+   Empty State
+   ========================================================================== */
+.empty-state {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  border: 1px dashed var(--border-medium);
+  border-radius: var(--radius-xl);
+  animation: fadeInDown 0.3s ease-out;
+}
+
+.empty-illustration {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 1.25rem;
+  color: var(--primary-400);
+}
+
+.empty-title {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.empty-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 380px;
+  margin: 0.45rem 0 1.25rem;
+}
+
+/* ==========================================================================
+   Edit Task Modal Dialog
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-dialog {
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.75rem;
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.modal-text-input {
+  width: 100%;
+  padding: 0.75rem 0.95rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.modal-text-input:focus {
+  border-color: var(--primary-400);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ==========================================================================
+   Toast Notification Banner
+   ========================================================================== */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-medium);
+  box-shadow: var(--shadow-lg);
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 300px;
+  max-width: 420px;
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all var(--transition-fast);
+}
+
+.toast.toast-undo {
+  border-left: 4px solid var(--primary-400);
+}
+
+.toast.toast-success {
+  border-left: 4px solid var(--accent-emerald);
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.toast-undo-btn {
+  background: var(--primary-500);
+  border: none;
+  color: #ffffff;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.toast-undo-btn:hover {
+  background: var(--primary-400);
+}
+
+.toast-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.8125rem;
+  color: var(--text-dim);
+}
+
+.footer-shortcuts {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.footer-shortcuts kbd {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Keyframes & Animations
+   ========================================================================== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulseLight {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Utility Hidden */
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .progress-card {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 680px) {
+  .app-container {
+    padding: 1.25rem 1rem 2.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .progress-card {
+    grid-column: span 2;
+  }
+
+  .form-main-row {
+    flex-direction: column;
+  }
+
+  .primary-gradient-btn {
+    width: 100%;
+  }
+
+  .text-pill-btn {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .controls-top-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sort-selector-group {
+    justify-content: space-between;
+  }
+
+  .filters-pills-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .category-filter-wrapper {
+    width: 100%;
+  }
+
+  .category-filter-select {
+    width: 100%;
+  }
+
+  .task-meta-row, .subtasks-wrapper {
+    padding-left: 0;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .app-footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+</style>
+</head>
+<body>
+  <!-- Canvas for celebratory particle confetti -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 11 3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h1 class="brand-title">Task<span>Flow</span></h1>
+          <p class="brand-greeting" id="greeting-text">Welcome back! Let's get things done.</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Live Clock & Date Badge -->
+        <div class="date-badge" id="live-date-badge" title="Current Date">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span id="current-date-display">Today</span>
+        </div>
+
+        <!-- Sound Toggle -->
+        <button id="sound-toggle-btn" class="icon-button" aria-label="Toggle Sound Effects" title="Toggle Sound FX">
+          <svg id="sound-icon-on" class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg id="sound-icon-off" class="btn-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle-btn" class="icon-button" aria-label="Toggle Dark and Light Theme" title="Toggle Theme">
+          <svg id="theme-icon-sun" class="btn-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="theme-icon-moon" class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <!-- Data Actions Dropdown Button -->
+        <div class="dropdown-wrapper">
+          <button id="data-menu-btn" class="icon-button" aria-label="Data Import and Export" title="Backup & Restore">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="12" cy="5" r="1"></circle>
+              <circle cx="12" cy="19" r="1"></circle>
+            </svg>
+          </button>
+          <div id="data-dropdown-menu" class="dropdown-menu hidden">
+            <button id="export-json-btn" class="dropdown-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Export JSON
+            </button>
+            <label for="import-json-input" class="dropdown-item file-label">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Import JSON
+              <input type="file" id="import-json-input" accept=".json" class="hidden">
+            </label>
+            <button id="reset-sample-btn" class="dropdown-item text-danger">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+              Load Sample Tasks
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Productivity Dashboard Statistics Cards -->
+    <section class="stats-grid" aria-label="Task Analytics and Progress">
+      <!-- Progress Bar Card -->
+      <div class="stat-card progress-card">
+        <div class="progress-details">
+          <span class="stat-label">Productivity Score</span>
+          <div class="stat-heading">
+            <span class="progress-percent" id="stat-progress-percent">0%</span>
+            <span class="stat-subtext" id="stat-progress-ratio">0 of 0 done</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="stat-progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+        <div class="progress-ring-container">
+          <svg class="progress-ring" width="68" height="68">
+            <circle class="progress-ring-bg" stroke="currentColor" stroke-width="6" fill="transparent" r="28" cx="34" cy="34" />
+            <circle class="progress-ring-circle" id="stat-progress-circle" stroke="currentColor" stroke-width="6" stroke-dasharray="175.92" stroke-dashoffset="175.92" stroke-linecap="round" fill="transparent" r="28" cx="34" cy="34" />
+          </svg>
+          <span class="ring-emoji" id="progress-emoji">🎯</span>
+        </div>
+      </div>
+
+      <!-- Quick Counters -->
+      <div class="stat-card" data-stat-filter="all">
+        <div class="stat-icon-wrapper total-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-number" id="count-all">0</span>
+          <span class="stat-label">Total Tasks</span>
+        </div>
+      </div>
+
+      <div class="stat-card" data-stat-filter="active">
+        <div class="stat-icon-wrapper pending-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-number" id="count-active">0</span>
+          <span class="stat-label">In Progress</span>
+        </div>
+      </div>
+
+      <div class="stat-card" data-stat-filter="completed">
+        <div class="stat-icon-wrapper completed-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-number" id="count-completed">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+
+      <div class="stat-card" data-stat-filter="high">
+        <div class="stat-icon-wrapper urgent-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+            <line x1="4" y1="22" x2="4" y2="15"></line>
+          </svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-number" id="count-high">0</span>
+          <span class="stat-label">Urgent Focus</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Layout -->
+    <main class="app-main-grid">
+      <!-- Task Creation Panel -->
+      <section class="task-creator-panel glass-card" aria-label="Create New Task">
+        <form id="new-task-form" class="task-form">
+          <div class="form-main-row">
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="16"></line>
+                  <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+              </span>
+              <input 
+                type="text" 
+                id="task-title-input" 
+                class="main-text-input" 
+                placeholder="What do you need to accomplish? (Press Enter or click 🎙️ to Speak)" 
+                maxlength="150" 
+                required 
+                autocomplete="off"
+              >
+              <button type="button" id="voice-input-btn" class="input-voice-btn" aria-label="Speech to text" title="Speech to Text (Click and speak your task)">
+                <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+                <span class="voice-pulse-ring"></span>
+              </button>
+            </div>
+            <button type="submit" id="add-task-btn" class="primary-gradient-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Add Task</span>
+            </button>
+          </div>
+
+          <!-- Live Voice Input Listening Bar -->
+          <div id="voice-status-bar" class="voice-status-bar hidden">
+            <span class="voice-live-dot"></span>
+            <span id="voice-status-text" class="voice-status-text">Listening... Speak now</span>
+            <div class="voice-soundwaves">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <button type="button" id="voice-stop-btn" class="voice-stop-btn">Finish Voice</button>
+          </div>
+
+          <!-- Extended Task Options Accordion/Bar -->
+          <div class="form-options-bar">
+            <!-- Priority Selector -->
+            <div class="form-option-group">
+              <label for="task-priority-select" class="option-label">Priority</label>
+              <div class="custom-select-wrapper">
+                <select id="task-priority-select" class="form-select">
+                  <option value="low">🟢 Low</option>
+                  <option value="medium" selected>🟡 Medium</option>
+                  <option value="high">🔴 High</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Category Selector -->
+            <div class="form-option-group">
+              <label for="task-category-select" class="option-label">Category</label>
+              <div class="custom-select-wrapper">
+                <select id="task-category-select" class="form-select">
+                  <option value="Work">💼 Work</option>
+                  <option value="Personal" selected>👤 Personal</option>
+                  <option value="Study">📚 Study</option>
+                  <option value="Health">💪 Health</option>
+                  <option value="Finance">💰 Finance</option>
+                  <option value="Creative">🎨 Creative</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Due Date Picker -->
+            <div class="form-option-group">
+              <label for="task-due-date" class="option-label">Due Date</label>
+              <div class="date-input-wrapper">
+                <input type="date" id="task-due-date" class="form-date-input">
+              </div>
+            </div>
+
+            <!-- Toggle Details Button -->
+            <button type="button" id="toggle-advanced-btn" class="text-pill-btn" aria-expanded="false" title="Add notes and subtasks">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="6" x2="20" y2="6"></line>
+                <line x1="4" y1="12" x2="14" y2="12"></line>
+                <line x1="4" y1="18" x2="18" y2="18"></line>
+              </svg>
+              <span>Add Details</span>
+            </button>
+          </div>
+
+          <!-- Collapsible Note & Subtasks area -->
+          <div id="advanced-fields" class="advanced-fields hidden">
+            <div class="form-sub-row">
+              <textarea id="task-notes-input" class="form-textarea" placeholder="Add detailed notes or context..." rows="2"></textarea>
+            </div>
+            <div class="subtasks-input-area">
+              <div class="subtask-add-row">
+                <input type="text" id="subtask-quick-input" class="subtask-input" placeholder="Add a checklist item (e.g. Gather documents)">
+                <button type="button" id="add-subtask-draft-btn" class="secondary-btn small-btn">+ Add Item</button>
+              </div>
+              <ul id="draft-subtasks-list" class="draft-subtasks-list"></ul>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Task Explorer / Feed Section -->
+      <section class="task-feed-section" aria-label="Task Management Feed">
+        <!-- Control Bar: Search, Filters & Sorters -->
+        <div class="feed-controls glass-card">
+          <!-- Top Row: Search and Batch Actions -->
+          <div class="controls-top-row">
+            <div class="search-box">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="task-search-input" placeholder="Search tasks by title, note, or tag... (Press '/' to search)" autocomplete="off">
+              <button id="clear-search-btn" class="clear-input-btn hidden" aria-label="Clear Search">✕</button>
+              <span class="keyboard-hint" aria-hidden="true">/</span>
+            </div>
+
+            <!-- Sort By Selector -->
+            <div class="sort-selector-group">
+              <label for="sort-tasks-select" class="sort-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="4" y1="6" x2="16" y2="6"></line>
+                  <line x1="4" y1="12" x2="12" y2="12"></line>
+                  <line x1="4" y1="18" x2="8" y2="18"></line>
+                </svg>
+                Sort:
+              </label>
+              <select id="sort-tasks-select" class="form-select inline-select">
+                <option value="created-desc">Newest First</option>
+                <option value="created-asc">Oldest First</option>
+                <option value="due-asc">Due Date (Earliest)</option>
+                <option value="priority-desc">Priority (High to Low)</option>
+                <option value="alpha-asc">Alphabetical (A - Z)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Filter Pills Row -->
+          <div class="filters-pills-row">
+            <div class="filter-status-pills" role="tablist" aria-label="Task status filters">
+              <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true">
+                All <span class="badge" id="pill-all-count">0</span>
+              </button>
+              <button class="filter-tab" data-filter="active" role="tab" aria-selected="false">
+                Active <span class="badge" id="pill-active-count">0</span>
+              </button>
+              <button class="filter-tab" data-filter="completed" role="tab" aria-selected="false">
+                Completed <span class="badge" id="pill-completed-count">0</span>
+              </button>
+              <button class="filter-tab" data-filter="today" role="tab" aria-selected="false">
+                Due Today <span class="badge" id="pill-today-count">0</span>
+              </button>
+              <button class="filter-tab" data-filter="starred" role="tab" aria-selected="false">
+                Starred ⭐ <span class="badge" id="pill-starred-count">0</span>
+              </button>
+            </div>
+
+            <!-- Category Filter dropdown -->
+            <div class="category-filter-wrapper">
+              <select id="category-filter-select" class="form-select category-filter-select" aria-label="Filter by category">
+                <option value="all">📁 All Categories</option>
+                <option value="Work">💼 Work</option>
+                <option value="Personal">👤 Personal</option>
+                <option value="Study">📚 Study</option>
+                <option value="Health">💪 Health</option>
+                <option value="Finance">💰 Finance</option>
+                <option value="Creative">🎨 Creative</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Secondary Toolbar: Bulk Actions -->
+          <div class="bulk-actions-bar">
+            <div class="bulk-status-info">
+              <span id="active-filter-summary">Showing all tasks</span>
+            </div>
+            <div class="bulk-btn-group">
+              <button id="mark-all-done-btn" class="subtle-link-btn" title="Mark visible tasks completed">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Complete All
+              </button>
+              <button id="clear-completed-btn" class="subtle-link-btn text-danger" title="Remove all completed tasks">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Clear Completed
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task List Container -->
+        <ul id="task-list" class="task-list" aria-live="polite" aria-label="Tasks List">
+          <!-- Dynamically populated via app.js -->
+        </ul>
+
+        <!-- Empty State (Shown when no tasks match) -->
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-illustration">
+            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="60" cy="60" r="50" fill="url(#empty-gradient)" fill-opacity="0.15" stroke="currentColor" stroke-width="2" stroke-dasharray="6 6"/>
+              <path d="M42 60L54 72L78 48" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              <defs>
+                <linearGradient id="empty-gradient" x1="10" y1="10" x2="110" y2="110" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#6366f1"/>
+                  <stop offset="1" stop-color="#06b6d4"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <h2 class="empty-title" id="empty-title-text">All Caught Up!</h2>
+          <p class="empty-subtitle" id="empty-desc-text">You have no tasks in this view. Enjoy your day or add a new goal above!</p>
+          <button id="empty-add-btn" class="primary-gradient-btn small-btn">
+            + Create New Task
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-shortcuts">
+        <span><kbd>Enter</kbd> Add Task</span>
+        <span><kbd>/</kbd> Quick Search</span>
+        <span><kbd>Esc</kbd> Close Modals</span>
+      </div>
+      <p class="footer-credit">TaskFlow &bull; Engineered for clarity, speed, and elegance &bull; Saves automatically</p>
+    </footer>
+  </div>
+
+  <!-- Edit Task Modal -->
+  <div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+    <div class="modal-dialog glass-card">
+      <div class="modal-header">
+        <h3 id="edit-modal-title" class="modal-title">Edit Task Details</h3>
+        <button id="close-modal-btn" class="icon-button close-btn" aria-label="Close dialog">✕</button>
+      </div>
+      <form id="edit-task-form" class="modal-body">
+        <input type="hidden" id="edit-task-id">
+
+        <div class="form-group">
+          <div class="label-with-voice">
+            <label for="edit-title-input" class="form-label">Task Title</label>
+            <button type="button" class="voice-field-btn" data-voice-target="edit-title-input" title="Speak Task Title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+              <span>Voice</span>
+            </button>
+          </div>
+          <input type="text" id="edit-title-input" class="modal-text-input" required maxlength="150">
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="edit-priority-select" class="form-label">Priority</label>
+            <select id="edit-priority-select" class="form-select">
+              <option value="low">🟢 Low Priority</option>
+              <option value="medium">🟡 Medium Priority</option>
+              <option value="high">🔴 High Priority</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-category-select" class="form-label">Category</label>
+            <select id="edit-category-select" class="form-select">
+              <option value="Work">💼 Work</option>
+              <option value="Personal">👤 Personal</option>
+              <option value="Study">📚 Study</option>
+              <option value="Health">💪 Health</option>
+              <option value="Finance">💰 Finance</option>
+              <option value="Creative">🎨 Creative</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-due-date" class="form-label">Due Date</label>
+          <input type="date" id="edit-due-date" class="form-date-input">
+        </div>
+
+        <div class="form-group">
+          <div class="label-with-voice">
+            <label for="edit-notes-input" class="form-label">Description &amp; Notes</label>
+            <button type="button" class="voice-field-btn" data-voice-target="edit-notes-input" title="Speak Notes">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+              <span>Voice</span>
+            </button>
+          </div>
+          <textarea id="edit-notes-input" class="form-textarea" rows="3" placeholder="Add additional details..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Subtasks / Checklist</label>
+          <div class="subtask-add-row">
+            <input type="text" id="edit-subtask-input" class="subtask-input" placeholder="Add subtask...">
+            <button type="button" id="edit-subtask-add-btn" class="secondary-btn small-btn">+ Add</button>
+          </div>
+          <ul id="edit-subtasks-list" class="edit-subtasks-list"></ul>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="cancel-edit-btn" class="secondary-btn">Cancel</button>
+          <button type="submit" class="primary-gradient-btn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+  <script>
+/**
+ * TaskFlow - Advanced To-Do & Task Management Application
+ * Pure Vanilla JavaScript implementation with Web Audio FX, Canvas Confetti, and LocalStorage
+ */
+
+(() => {
+  'use strict';
+
+  // --- Initial Default Sample Tasks ---
+  const DEFAULT_SAMPLE_TASKS = [
+    {
+      id: 'task-1',
+      title: 'Design high-fidelity design system tokens',
+      notes: 'Finalize primary indigo and cyan gradients, border radii, and dark mode contrast ratios.',
+      priority: 'high',
+      category: 'Work',
+      dueDate: getRelativeDateString(0), // Today
+      completed: false,
+      starred: true,
+      createdAt: Date.now() - 3600000 * 2,
+      subtasks: [
+        { id: 'sub-1', title: 'Export Figma color styles', completed: true },
+        { id: 'sub-2', title: 'Verify WCAG AA contrast ratio', completed: false },
+        { id: 'sub-3', title: 'Document typography scale', completed: false }
+      ]
+    },
+    {
+      id: 'task-2',
+      title: 'Review weekly sprint deliverables & merge PRs',
+      notes: 'Check responsive breakpoint tests on mobile devices.',
+      priority: 'medium',
+      category: 'Work',
+      dueDate: getRelativeDateString(1), // Tomorrow
+      completed: false,
+      starred: false,
+      createdAt: Date.now() - 3600000 * 5,
+      subtasks: []
+    },
+    {
+      id: 'task-3',
+      title: 'Morning 30-minute cardio & strength routine',
+      notes: 'Hydrate well and stretch hamstrings.',
+      priority: 'medium',
+      category: 'Health',
+      dueDate: getRelativeDateString(0),
+      completed: true,
+      starred: false,
+      createdAt: Date.now() - 3600000 * 8,
+      subtasks: []
+    },
+    {
+      id: 'task-4',
+      title: 'Read chapter 4 of Clean Architecture book',
+      notes: 'Take notes on dependency inversion and interface segregation principles.',
+      priority: 'low',
+      category: 'Study',
+      dueDate: getRelativeDateString(2),
+      completed: false,
+      starred: true,
+      createdAt: Date.now() - 3600000 * 12,
+      subtasks: []
+    }
+  ];
+
+  // Helper for relative date strings (YYYY-MM-DD)
+  function getRelativeDateString(offsetDays) {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // --- State ---
+  let tasks = [];
+  let currentFilter = 'all'; // 'all', 'active', 'completed', 'today', 'starred'
+  let currentCategory = 'all';
+  let searchQuery = '';
+  let currentSort = 'created-desc';
+  let isSoundEnabled = true;
+  let draftSubtasks = [];
+  let editSubtasks = [];
+  let lastDeletedTask = null;
+  let undoTimeoutId = null;
+
+  // --- DOM Elements ---
+  const taskListEl = document.getElementById('task-list');
+  const emptyStateEl = document.getElementById('empty-state');
+  const emptyTitleText = document.getElementById('empty-title-text');
+  const emptyDescText = document.getElementById('empty-desc-text');
+  const newTaskForm = document.getElementById('new-task-form');
+  const taskTitleInput = document.getElementById('task-title-input');
+  const taskPrioritySelect = document.getElementById('task-priority-select');
+  const taskCategorySelect = document.getElementById('task-category-select');
+  const taskDueDate = document.getElementById('task-due-date');
+  const toggleAdvancedBtn = document.getElementById('toggle-advanced-btn');
+  const advancedFields = document.getElementById('advanced-fields');
+  const taskNotesInput = document.getElementById('task-notes-input');
+  const subtaskQuickInput = document.getElementById('subtask-quick-input');
+  const addSubtaskDraftBtn = document.getElementById('add-subtask-draft-btn');
+  const draftSubtasksListEl = document.getElementById('draft-subtasks-list');
+
+  // Search & Filter
+  const taskSearchInput = document.getElementById('task-search-input');
+  const clearSearchBtn = document.getElementById('clear-search-btn');
+  const sortTasksSelect = document.getElementById('sort-tasks-select');
+  const categoryFilterSelect = document.getElementById('category-filter-select');
+  const filterTabs = document.querySelectorAll('.filter-tab');
+  const activeFilterSummary = document.getElementById('active-filter-summary');
+
+  // Stats Counters & Ring
+  const countAllEl = document.getElementById('count-all');
+  const countActiveEl = document.getElementById('count-active');
+  const countCompletedEl = document.getElementById('count-completed');
+  const countHighEl = document.getElementById('count-high');
+  const pillAllCount = document.getElementById('pill-all-count');
+  const pillActiveCount = document.getElementById('pill-active-count');
+  const pillCompletedCount = document.getElementById('pill-completed-count');
+  const pillTodayCount = document.getElementById('pill-today-count');
+  const pillStarredCount = document.getElementById('pill-starred-count');
+  const statProgressPercent = document.getElementById('stat-progress-percent');
+  const statProgressRatio = document.getElementById('stat-progress-ratio');
+  const statProgressFill = document.getElementById('stat-progress-fill');
+  const statProgressCircle = document.getElementById('stat-progress-circle');
+  const progressEmoji = document.getElementById('progress-emoji');
+
+  // Header Elements
+  const greetingText = document.getElementById('greeting-text');
+  const currentDateDisplay = document.getElementById('current-date-display');
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  const themeIconSun = document.getElementById('theme-icon-sun');
+  const themeIconMoon = document.getElementById('theme-icon-moon');
+  const soundToggleBtn = document.getElementById('sound-toggle-btn');
+  const soundIconOn = document.getElementById('sound-icon-on');
+  const soundIconOff = document.getElementById('sound-icon-off');
+  const dataMenuBtn = document.getElementById('data-menu-btn');
+  const dataDropdownMenu = document.getElementById('data-dropdown-menu');
+  const exportJsonBtn = document.getElementById('export-json-btn');
+  const importJsonInput = document.getElementById('import-json-input');
+  const resetSampleBtn = document.getElementById('reset-sample-btn');
+
+  // Bulk buttons
+  const markAllDoneBtn = document.getElementById('mark-all-done-btn');
+  const clearCompletedBtn = document.getElementById('clear-completed-btn');
+  const emptyAddBtn = document.getElementById('empty-add-btn');
+
+  // Edit Modal Elements
+  const editModal = document.getElementById('edit-modal');
+  const editTaskForm = document.getElementById('edit-task-form');
+  const editTaskId = document.getElementById('edit-task-id');
+  const editTitleInput = document.getElementById('edit-title-input');
+  const editPrioritySelect = document.getElementById('edit-priority-select');
+  const editCategorySelect = document.getElementById('edit-category-select');
+  const editDueDate = document.getElementById('edit-due-date');
+  const editNotesInput = document.getElementById('edit-notes-input');
+  const editSubtaskInput = document.getElementById('edit-subtask-input');
+  const editSubtaskAddBtn = document.getElementById('edit-subtask-add-btn');
+  const editSubtasksListEl = document.getElementById('edit-subtasks-list');
+  const closeModalBtn = document.getElementById('close-modal-btn');
+  const cancelEditBtn = document.getElementById('cancel-edit-btn');
+
+  // Toast Container
+  const toastContainer = document.getElementById('toast-container');
+
+  // --- Web Audio Synthesizer (Zero asset dependency) ---
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function playUiSound(type) {
+    if (!isSoundEnabled) return;
+    try {
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'complete') {
+        // High, joyful pleasant 2-chord chime
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        osc1.type = 'sine';
+        osc2.type = 'triangle';
+
+        osc1.frequency.setValueAtTime(523.25, now); // C5
+        osc1.frequency.exponentialRampToValueAtTime(783.99, now + 0.15); // G5
+
+        osc2.frequency.setValueAtTime(659.25, now); // E5
+        osc2.frequency.exponentialRampToValueAtTime(1046.50, now + 0.18); // C6
+
+        gainNode.gain.setValueAtTime(0.18, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.35);
+        osc2.stop(now + 0.35);
+      } else if (type === 'add') {
+        // Crisp pop
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'delete') {
+        // Soft descending swoosh
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.12);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
+    } catch {
+      // AudioContext failure should not stop app flow
+    }
+  }
+
+  // --- Confetti Particle System ---
+  const confettiCanvas = document.getElementById('confetti-canvas');
+  const confettiCtx = confettiCanvas ? confettiCanvas.getContext('2d') : null;
+  let particles = [];
+  let confettiAnimId = null;
+
+  function resizeConfetti() {
+    if (!confettiCanvas) return;
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeConfetti);
+  resizeConfetti();
+
+  function triggerConfettiBurst(originX, originY) {
+    if (!confettiCtx) return;
+    const colors = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#a855f7'];
+    const count = 45;
+    const x = originX || window.innerWidth / 2;
+    const y = originY || window.innerHeight / 3;
+
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 4 + Math.random() * 8;
+      particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2,
+        size: 5 + Math.random() * 5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 12,
+        opacity: 1,
+        decay: 0.015 + Math.random() * 0.02
+      });
+    }
+
+    if (!confettiAnimId) {
+      animateConfetti();
+    }
+  }
+
+  function animateConfetti() {
+    if (!confettiCtx) return;
+    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.25; // gravity
+      p.vx *= 0.98;
+      p.rotation += p.rotationSpeed;
+      p.opacity -= p.decay;
+
+      if (p.opacity <= 0 || p.y > confettiCanvas.height) {
+        particles.splice(i, 1);
+        continue;
+      }
+
+      confettiCtx.save();
+      confettiCtx.translate(p.x, p.y);
+      confettiCtx.rotate((p.rotation * Math.PI) / 180);
+      confettiCtx.globalAlpha = p.opacity;
+      confettiCtx.fillStyle = p.color;
+      confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      confettiCtx.restore();
+    }
+
+    if (particles.length > 0) {
+      confettiAnimId = requestAnimationFrame(animateConfetti);
+    } else {
+      confettiAnimId = null;
+    }
+  }
+
+  // --- LocalStorage & State Persistence ---
+  function loadPersistedData() {
+    // Tasks
+    const storedTasks = localStorage.getItem('taskflow_tasks');
+    if (storedTasks) {
+      try {
+        tasks = JSON.parse(storedTasks);
+      } catch {
+        tasks = [...DEFAULT_SAMPLE_TASKS];
+      }
+    } else {
+      tasks = [...DEFAULT_SAMPLE_TASKS];
+      saveTasksToStorage();
+    }
+
+    // Theme
+    const savedTheme = localStorage.getItem('taskflow_theme') || 'dark';
+    applyTheme(savedTheme);
+
+    // Sound
+    const savedSound = localStorage.getItem('taskflow_sound');
+    if (savedSound !== null) {
+      isSoundEnabled = savedSound === 'true';
+    }
+    updateSoundButtonUi();
+
+    // Set default due date in form to today
+    taskDueDate.value = getRelativeDateString(0);
+  }
+
+  function saveTasksToStorage() {
+    localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
+  }
+
+  // --- Theme Management ---
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('taskflow_theme', theme);
+    if (theme === 'dark') {
+      themeIconSun.classList.add('hidden');
+      themeIconMoon.classList.remove('hidden');
+    } else {
+      themeIconSun.classList.remove('hidden');
+      themeIconMoon.classList.add('hidden');
+    }
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    showToast(`Switched to ${next} theme`, 'info');
+  }
+
+  // --- Sound Management ---
+  function toggleSound() {
+    isSoundEnabled = !isSoundEnabled;
+    localStorage.setItem('taskflow_sound', isSoundEnabled);
+    updateSoundButtonUi();
+    showToast(`Sound FX ${isSoundEnabled ? 'Enabled' : 'Muted'}`, 'info');
+    if (isSoundEnabled) {
+      playUiSound('add');
+    }
+  }
+
+  function updateSoundButtonUi() {
+    if (isSoundEnabled) {
+      soundIconOn.classList.remove('hidden');
+      soundIconOff.classList.add('hidden');
+    } else {
+      soundIconOn.classList.add('hidden');
+      soundIconOff.classList.remove('hidden');
+    }
+  }
+
+  // --- Greeting and Live Clock ---
+  function updateGreetingAndDate() {
+    const now = new Date();
+    const hours = now.getHours();
+
+    let greeting = 'Good morning';
+    let emoji = '🌅';
+    if (hours >= 12 && hours < 17) {
+      greeting = 'Good afternoon';
+      emoji = '⚡';
+    } else if (hours >= 17 && hours < 22) {
+      greeting = 'Good evening';
+      emoji = '✨';
+    } else if (hours >= 22 || hours < 5) {
+      greeting = 'Burning the midnight oil';
+      emoji = '🌙';
+    }
+
+    greetingText.textContent = `${greeting}, Champion ${emoji} Let's conquer the day.`;
+
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+    currentDateDisplay.textContent = now.toLocaleDateString('en-US', options);
+  }
+
+  // --- Filtering and Sorting ---
+  function getFilteredAndSortedTasks() {
+    let result = [...tasks];
+    const todayStr = getRelativeDateString(0);
+
+    // Status filter
+    if (currentFilter === 'active') {
+      result = result.filter(t => !t.completed);
+    } else if (currentFilter === 'completed') {
+      result = result.filter(t => t.completed);
+    } else if (currentFilter === 'today') {
+      result = result.filter(t => t.dueDate === todayStr);
+    } else if (currentFilter === 'starred') {
+      result = result.filter(t => t.starred);
+    }
+
+    // Category filter
+    if (currentCategory !== 'all') {
+      result = result.filter(t => t.category === currentCategory);
+    }
+
+    // Search query
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(t => {
+        const titleMatch = t.title.toLowerCase().includes(q);
+        const notesMatch = t.notes && t.notes.toLowerCase().includes(q);
+        const catMatch = t.category.toLowerCase().includes(q);
+        const subtasksMatch = t.subtasks && t.subtasks.some(s => s.title.toLowerCase().includes(q));
+        return titleMatch || notesMatch || catMatch || subtasksMatch;
+      });
+    }
+
+    // Sorting
+    result.sort((a, b) => {
+      if (currentSort === 'created-desc') {
+        return (b.createdAt || 0) - (a.createdAt || 0);
+      } else if (currentSort === 'created-asc') {
+        return (a.createdAt || 0) - (b.createdAt || 0);
+      } else if (currentSort === 'due-asc') {
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return a.dueDate.localeCompare(b.dueDate);
+      } else if (currentSort === 'priority-desc') {
+        const pMap = { high: 3, medium: 2, low: 1 };
+        return (pMap[b.priority] || 1) - (pMap[a.priority] || 1);
+      } else if (currentSort === 'alpha-asc') {
+        return a.title.localeCompare(b.title);
+      }
+      return 0;
+    });
+
+    return result;
+  }
+
+  // --- Stats Dashboard & Ring Calculations ---
+  function updateDashboardStats() {
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.completed).length;
+    const active = total - completed;
+    const high = tasks.filter(t => t.priority === 'high' && !t.completed).length;
+    const todayStr = getRelativeDateString(0);
+    const todayCount = tasks.filter(t => t.dueDate === todayStr).length;
+    const starredCount = tasks.filter(t => t.starred).length;
+
+    // Update count labels
+    countAllEl.textContent = total;
+    countActiveEl.textContent = active;
+    countCompletedEl.textContent = completed;
+    countHighEl.textContent = high;
+
+    // Update filter pill counts
+    pillAllCount.textContent = total;
+    pillActiveCount.textContent = active;
+    pillCompletedCount.textContent = completed;
+    pillTodayCount.textContent = todayCount;
+    pillStarredCount.textContent = starredCount;
+
+    // Productivity Percentage
+    const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+    statProgressPercent.textContent = `${percentage}%`;
+    statProgressRatio.textContent = `${completed} of ${total} done`;
+    statProgressFill.style.width = `${percentage}%`;
+
+    // SVG Circular Ring: circumference = 2 * PI * 28 = ~175.92
+    const circumference = 2 * Math.PI * 28;
+    const offset = circumference - (percentage / 100) * circumference;
+    statProgressCircle.style.strokeDashoffset = offset;
+
+    // Reactive emoji on completion score
+    if (percentage === 100 && total > 0) {
+      progressEmoji.textContent = '🏆';
+    } else if (percentage >= 70) {
+      progressEmoji.textContent = '🔥';
+    } else if (percentage >= 40) {
+      progressEmoji.textContent = '⚡';
+    } else {
+      progressEmoji.textContent = '🎯';
+    }
+  }
+
+  // --- Render Tasks Feed ---
+  function renderTasks() {
+    updateDashboardStats();
+    const visibleTasks = getFilteredAndSortedTasks();
+    taskListEl.innerHTML = '';
+
+    // Summary line
+    let summaryText = `Showing ${visibleTasks.length} ${visibleTasks.length === 1 ? 'task' : 'tasks'}`;
+    if (currentFilter !== 'all') summaryText += ` in "${currentFilter}"`;
+    if (currentCategory !== 'all') summaryText += ` (${currentCategory})`;
+    if (searchQuery.trim()) summaryText += ` matching "${searchQuery}"`;
+    activeFilterSummary.textContent = summaryText;
+
+    if (visibleTasks.length === 0) {
+      emptyStateEl.classList.remove('hidden');
+      if (searchQuery.trim()) {
+        emptyTitleText.textContent = 'No matching tasks';
+        emptyDescText.textContent = `No tasks found matching "${searchQuery}". Try a different keyword or clear your search.`;
+      } else if (currentFilter === 'completed') {
+        emptyTitleText.textContent = 'No tasks completed yet';
+        emptyDescText.textContent = 'Check off active items as you finish them to build momentum!';
+      } else if (currentFilter === 'today') {
+        emptyTitleText.textContent = 'Nothing due today';
+        emptyDescText.textContent = 'Great job staying on top of deadlines or assign today to upcoming tasks.';
+      } else {
+        emptyTitleText.textContent = 'All Caught Up!';
+        emptyDescText.textContent = 'Your task list is crystal clear. Enjoy the moment or add your next milestone.';
+      }
+      return;
+    }
+
+    emptyStateEl.classList.add('hidden');
+
+    const todayStr = getRelativeDateString(0);
+
+    visibleTasks.forEach(task => {
+      const li = document.createElement('li');
+      li.className = `task-item priority-${task.priority}-border ${task.completed ? 'task-completed' : ''}`;
+      li.dataset.id = task.id;
+
+      // Subtasks completed count
+      const totalSubtasks = (task.subtasks || []).length;
+      const completedSubtasks = (task.subtasks || []).filter(s => s.completed).length;
+
+      // Date Badge logic
+      let dueDateBadgeHtml = '';
+      if (task.dueDate) {
+        let dateClass = 'badge-due';
+        let label = formatDateDisplay(task.dueDate);
+
+        if (!task.completed) {
+          if (task.dueDate < todayStr) {
+            dateClass += ' is-overdue';
+            label = `⚠️ Overdue (${label})`;
+          } else if (task.dueDate === todayStr) {
+            dateClass += ' is-today';
+            label = `⚡ Today`;
+          }
+        }
+
+        dueDateBadgeHtml = `
+          <span class="badge-pill ${dateClass}" title="Due date">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+            ${label}
+          </span>
+        `;
+      }
+
+      // Subtask Accordion HTML
+      let subtasksHtml = '';
+      if (totalSubtasks > 0) {
+        subtasksHtml = `
+          <div class="subtasks-wrapper">
+            <button class="subtasks-toggle-btn" data-toggle-subtasks="${task.id}" aria-expanded="false">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span>Subtasks (${completedSubtasks}/${totalSubtasks})</span>
+            </button>
+            <div class="task-subtasks-drawer hidden" id="subtasks-drawer-${task.id}">
+              ${task.subtasks.map(sub => `
+                <label class="subtask-item ${sub.completed ? 'completed' : ''}">
+                  <input type="checkbox" class="subtask-checkbox" data-task-id="${task.id}" data-subtask-id="${sub.id}" ${sub.completed ? 'checked' : ''}>
+                  <span>${escapeHtml(sub.title)}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      li.innerHTML = `
+        <div class="task-row-main">
+          <button class="custom-checkbox-btn ${task.completed ? 'checked' : ''}" data-action="toggle-complete" data-id="${task.id}" aria-label="${task.completed ? 'Mark incomplete' : 'Mark complete'}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+
+          <div class="task-content-body">
+            <div class="task-title">${escapeHtml(task.title)}</div>
+            ${task.notes ? `<p class="task-notes-preview">${escapeHtml(task.notes)}</p>` : ''}
+          </div>
+
+          <div class="task-actions">
+            <button class="task-action-btn star-btn ${task.starred ? 'is-starred' : ''}" data-action="toggle-star" data-id="${task.id}" title="${task.starred ? 'Unstar task' : 'Star task'}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="${task.starred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </button>
+            <button class="task-action-btn" data-action="edit" data-id="${task.id}" title="Edit task">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            </button>
+            <button class="task-action-btn delete-btn" data-action="delete" data-id="${task.id}" title="Delete task">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="task-meta-row">
+          <span class="badge-pill badge-cat-${escapeHtml(task.category)}">${escapeHtml(task.category)}</span>
+          <span class="badge-pill badge-priority-${task.priority}">
+            ${task.priority === 'high' ? '🔴 High' : task.priority === 'medium' ? '🟡 Medium' : '🟢 Low'}
+          </span>
+          ${dueDateBadgeHtml}
+        </div>
+
+        ${subtasksHtml}
+      `;
+
+      taskListEl.appendChild(li);
+    });
+  }
+
+  // --- Task Interactions & Delegation ---
+  taskListEl.addEventListener('click', (e) => {
+    // 1. Toggle Complete
+    const completeBtn = e.target.closest('[data-action="toggle-complete"]');
+    if (completeBtn) {
+      const taskId = completeBtn.dataset.id;
+      toggleTaskCompletion(taskId, completeBtn);
+      return;
+    }
+
+    // 2. Toggle Star
+    const starBtn = e.target.closest('[data-action="toggle-star"]');
+    if (starBtn) {
+      const taskId = starBtn.dataset.id;
+      toggleTaskStarred(taskId);
+      return;
+    }
+
+    // 3. Edit Task
+    const editBtn = e.target.closest('[data-action="edit"]');
+    if (editBtn) {
+      const taskId = editBtn.dataset.id;
+      openEditModal(taskId);
+      return;
+    }
+
+    // 4. Delete Task
+    const deleteBtn = e.target.closest('[data-action="delete"]');
+    if (deleteBtn) {
+      const taskId = deleteBtn.dataset.id;
+      deleteTaskWithUndo(taskId);
+      return;
+    }
+
+    // 5. Toggle Subtasks Drawer
+    const drawerBtn = e.target.closest('[data-toggle-subtasks]');
+    if (drawerBtn) {
+      const taskId = drawerBtn.dataset.toggleSubtasks;
+      const drawer = document.getElementById(`subtasks-drawer-${taskId}`);
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+        drawerBtn.classList.toggle('expanded');
+      }
+      return;
+    }
+
+    // 6. Subtask Checkbox
+    if (e.target.classList.contains('subtask-checkbox')) {
+      const taskId = e.target.dataset.taskId;
+      const subtaskId = e.target.dataset.subtaskId;
+      toggleSubtaskItem(taskId, subtaskId, e.target.checked);
+      return;
+    }
+  });
+
+  function toggleTaskCompletion(id, btnElement) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    task.completed = !task.completed;
+    saveTasksToStorage();
+
+    if (task.completed) {
+      playUiSound('complete');
+      if (btnElement) {
+        const rect = btnElement.getBoundingClientRect();
+        triggerConfettiBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      }
+      showToast(`Task completed! Keep up the momentum 🚀`, 'success');
+
+      // Check if all tasks completed!
+      const allDone = tasks.length > 0 && tasks.every(t => t.completed);
+      if (allDone) {
+        setTimeout(() => triggerConfettiBurst(), 300);
+      }
+    } else {
+      playUiSound('add');
+    }
+
+    renderTasks();
+  }
+
+  function toggleTaskStarred(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    task.starred = !task.starred;
+    saveTasksToStorage();
+    playUiSound('add');
+    renderTasks();
+  }
+
+  function toggleSubtaskItem(taskId, subtaskId, isChecked) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !task.subtasks) return;
+    const sub = task.subtasks.find(s => s.id === subtaskId);
+    if (sub) {
+      sub.completed = isChecked;
+      saveTasksToStorage();
+      if (isChecked) playUiSound('complete');
+      renderTasks();
+    }
+  }
+
+  function deleteTaskWithUndo(id) {
+    const taskIndex = tasks.findIndex(t => t.id === id);
+    if (taskIndex === -1) return;
+
+    lastDeletedTask = {
+      task: tasks[taskIndex],
+      index: taskIndex
+    };
+
+    tasks.splice(taskIndex, 1);
+    saveTasksToStorage();
+    playUiSound('delete');
+    renderTasks();
+
+    // Show undo toast
+    showUndoToast(`Task deleted`, () => {
+      if (lastDeletedTask) {
+        tasks.splice(lastDeletedTask.index, 0, lastDeletedTask.task);
+        saveTasksToStorage();
+        playUiSound('add');
+        renderTasks();
+        showToast('Task restored', 'success');
+        lastDeletedTask = null;
+      }
+    });
+  }
+
+  // --- Add Task Form Handling ---
+  newTaskForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = taskTitleInput.value.trim();
+    if (!title) return;
+
+    const newTask = {
+      id: 'task-' + Date.now(),
+      title: title,
+      priority: taskPrioritySelect.value,
+      category: taskCategorySelect.value,
+      dueDate: taskDueDate.value || '',
+      notes: taskNotesInput.value.trim(),
+      completed: false,
+      starred: false,
+      createdAt: Date.now(),
+      subtasks: [...draftSubtasks]
+    };
+
+    tasks.unshift(newTask);
+    saveTasksToStorage();
+    playUiSound('add');
+
+    // Reset inputs
+    taskTitleInput.value = '';
+    taskNotesInput.value = '';
+    draftSubtasks = [];
+    renderDraftSubtasks();
+
+    if (!advancedFields.classList.contains('hidden')) {
+      toggleAdvancedFormFields();
+    }
+
+    renderTasks();
+    showToast('Task added successfully', 'success');
+  });
+
+  // Toggle Advanced creation inputs
+  toggleAdvancedBtn.addEventListener('click', () => {
+    toggleAdvancedFormFields();
+  });
+
+  function toggleAdvancedFormFields() {
+    const isHidden = advancedFields.classList.toggle('hidden');
+    toggleAdvancedBtn.setAttribute('aria-expanded', !isHidden);
+    toggleAdvancedBtn.querySelector('span').textContent = isHidden ? 'Add Details' : 'Hide Details';
+  }
+
+  // Add draft subtask in new task form
+  addSubtaskDraftBtn.addEventListener('click', () => {
+    addDraftSubtask();
+  });
+
+  subtaskQuickInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addDraftSubtask();
+    }
+  });
+
+  function addDraftSubtask() {
+    const text = subtaskQuickInput.value.trim();
+    if (!text) return;
+    draftSubtasks.push({
+      id: 'sub-' + Date.now() + Math.random().toString(36).substring(2, 6),
+      title: text,
+      completed: false
+    });
+    subtaskQuickInput.value = '';
+    renderDraftSubtasks();
+  }
+
+  function renderDraftSubtasks() {
+    draftSubtasksListEl.innerHTML = draftSubtasks.map((sub, idx) => `
+      <li class="draft-subtask-item">
+        <span>${escapeHtml(sub.title)}</span>
+        <button type="button" class="remove-subtask-btn" data-draft-idx="${idx}" aria-label="Remove item">✕</button>
+      </li>
+    `).join('');
+  }
+
+  draftSubtasksListEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.remove-subtask-btn');
+    if (btn) {
+      const idx = parseInt(btn.dataset.draftIdx, 10);
+      draftSubtasks.splice(idx, 1);
+      renderDraftSubtasks();
+    }
+  });
+
+  // --- Edit Task Modal Logic ---
+  function openEditModal(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    editTaskId.value = task.id;
+    editTitleInput.value = task.title;
+    editPrioritySelect.value = task.priority;
+    editCategorySelect.value = task.category;
+    editDueDate.value = task.dueDate || '';
+    editNotesInput.value = task.notes || '';
+    editSubtasks = (task.subtasks || []).map(s => ({ ...s }));
+
+    renderEditSubtasks();
+    editModal.classList.remove('hidden');
+    editTitleInput.focus();
+  }
+
+  function closeEditModal() {
+    editModal.classList.add('hidden');
+    editSubtasks = [];
+  }
+
+  closeModalBtn.addEventListener('click', closeEditModal);
+  cancelEditBtn.addEventListener('click', closeEditModal);
+
+  editModal.addEventListener('click', (e) => {
+    if (e.target === editModal) {
+      closeEditModal();
+    }
+  });
+
+  editSubtaskAddBtn.addEventListener('click', () => {
+    addEditSubtask();
+  });
+
+  editSubtaskInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addEditSubtask();
+    }
+  });
+
+  function addEditSubtask() {
+    const text = editSubtaskInput.value.trim();
+    if (!text) return;
+    editSubtasks.push({
+      id: 'sub-' + Date.now() + Math.random().toString(36).substring(2, 6),
+      title: text,
+      completed: false
+    });
+    editSubtaskInput.value = '';
+    renderEditSubtasks();
+  }
+
+  function renderEditSubtasks() {
+    editSubtasksListEl.innerHTML = editSubtasks.map((sub, idx) => `
+      <li class="draft-subtask-item">
+        <span>${escapeHtml(sub.title)}</span>
+        <button type="button" class="remove-subtask-btn" data-edit-sub-idx="${idx}" aria-label="Remove item">✕</button>
+      </li>
+    `).join('');
+  }
+
+  editSubtasksListEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.remove-subtask-btn');
+    if (btn) {
+      const idx = parseInt(btn.dataset.editSubIdx, 10);
+      editSubtasks.splice(idx, 1);
+      renderEditSubtasks();
+    }
+  });
+
+  editTaskForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = editTaskId.value;
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    task.title = editTitleInput.value.trim();
+    task.priority = editPrioritySelect.value;
+    task.category = editCategorySelect.value;
+    task.dueDate = editDueDate.value || '';
+    task.notes = editNotesInput.value.trim();
+    task.subtasks = [...editSubtasks];
+
+    saveTasksToStorage();
+    playUiSound('add');
+    closeEditModal();
+    renderTasks();
+    showToast('Task updated successfully', 'success');
+  });
+
+  // --- Search & Filters Handlers ---
+  taskSearchInput.addEventListener('input', (e) => {
+    searchQuery = e.target.value;
+    if (searchQuery.length > 0) {
+      clearSearchBtn.classList.remove('hidden');
+    } else {
+      clearSearchBtn.classList.add('hidden');
+    }
+    renderTasks();
+  });
+
+  clearSearchBtn.addEventListener('click', () => {
+    taskSearchInput.value = '';
+    searchQuery = '';
+    clearSearchBtn.classList.add('hidden');
+    taskSearchInput.focus();
+    renderTasks();
+  });
+
+  filterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      filterTabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      currentFilter = tab.dataset.filter;
+      renderTasks();
+    });
+  });
+
+  categoryFilterSelect.addEventListener('change', (e) => {
+    currentCategory = e.target.value;
+    renderTasks();
+  });
+
+  sortTasksSelect.addEventListener('change', (e) => {
+    currentSort = e.target.value;
+    renderTasks();
+  });
+
+  // Stat Card click to filter
+  document.querySelectorAll('.stat-card[data-stat-filter]').forEach(card => {
+    card.addEventListener('click', () => {
+      const filter = card.dataset.statFilter;
+      const targetTab = document.querySelector(`.filter-tab[data-filter="${filter}"]`);
+      if (targetTab) {
+        targetTab.click();
+      }
+    });
+  });
+
+  // Bulk Actions
+  markAllDoneBtn.addEventListener('click', () => {
+    const visible = getFilteredAndSortedTasks();
+    if (visible.length === 0) return;
+    visible.forEach(t => t.completed = true);
+    saveTasksToStorage();
+    playUiSound('complete');
+    triggerConfettiBurst();
+    renderTasks();
+    showToast('All visible tasks marked complete!', 'success');
+  });
+
+  clearCompletedBtn.addEventListener('click', () => {
+    const completedCount = tasks.filter(t => t.completed).length;
+    if (completedCount === 0) {
+      showToast('No completed tasks to clear', 'info');
+      return;
+    }
+    tasks = tasks.filter(t => !t.completed);
+    saveTasksToStorage();
+    playUiSound('delete');
+    renderTasks();
+    showToast(`Cleared ${completedCount} completed tasks`, 'success');
+  });
+
+  emptyAddBtn.addEventListener('click', () => {
+    taskTitleInput.focus();
+    taskTitleInput.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // --- Data Import & Export ---
+  dataMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dataDropdownMenu.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', () => {
+    if (!dataDropdownMenu.classList.contains('hidden')) {
+      dataDropdownMenu.classList.add('hidden');
+    }
+  });
+
+  exportJsonBtn.addEventListener('click', () => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(tasks, null, 2));
+    const downloadAnchor = document.createElement('a');
+    const filename = `taskflow_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', filename);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    showToast('Tasks exported to JSON', 'success');
+  });
+
+  importJsonInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (Array.isArray(imported)) {
+          tasks = imported;
+          saveTasksToStorage();
+          renderTasks();
+          showToast(`Successfully imported ${imported.length} tasks`, 'success');
+        } else {
+          showToast('Invalid JSON file format', 'error');
+        }
+      } catch {
+        showToast('Error parsing JSON file', 'error');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  resetSampleBtn.addEventListener('click', () => {
+    if (confirm('Load sample tasks? This will append the starter task set.')) {
+      tasks = [...tasks, ...DEFAULT_SAMPLE_TASKS.map(t => ({ ...t, id: 'sample-' + Date.now() + Math.random().toString(36).substring(2, 5) }))];
+      saveTasksToStorage();
+      renderTasks();
+      showToast('Sample tasks loaded', 'success');
+    }
+  });
+
+  // --- Toast Notifications ---
+  function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <span class="toast-message">${escapeHtml(message)}</span>
+      <button class="toast-close-btn" aria-label="Close notification">✕</button>
+    `;
+
+    toast.querySelector('.toast-close-btn').addEventListener('click', () => {
+      toast.remove();
+    });
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(30px)';
+        setTimeout(() => toast.remove(), 250);
+      }
+    }, 3800);
+  }
+
+  function showUndoToast(message, onUndo) {
+    if (undoTimeoutId) {
+      clearTimeout(undoTimeoutId);
+    }
+
+    // Remove any previous undo toasts
+    const existingUndo = toastContainer.querySelector('.toast-undo');
+    if (existingUndo) existingUndo.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-undo';
+    toast.innerHTML = `
+      <span class="toast-message">${escapeHtml(message)}</span>
+      <button class="toast-undo-btn">Undo</button>
+      <button class="toast-close-btn" aria-label="Close notification">✕</button>
+    `;
+
+    toast.querySelector('.toast-undo-btn').addEventListener('click', () => {
+      onUndo();
+      toast.remove();
+    });
+
+    toast.querySelector('.toast-close-btn').addEventListener('click', () => {
+      toast.remove();
+    });
+
+    toastContainer.appendChild(toast);
+
+    undoTimeoutId = setTimeout(() => {
+      if (toast.parentNode) {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(30px)';
+        setTimeout(() => toast.remove(), 250);
+      }
+      lastDeletedTask = null;
+    }, 6000);
+  }
+
+  // --- Keyboard Shortcuts ---
+  document.addEventListener('keydown', (e) => {
+    // Focus search on '/'
+    if (e.key === '/' && document.activeElement !== taskTitleInput && document.activeElement !== taskNotesInput && document.activeElement !== taskSearchInput && document.activeElement !== editTitleInput && document.activeElement !== editNotesInput) {
+      e.preventDefault();
+      taskSearchInput.focus();
+      return;
+    }
+
+    // Escape closes modals and search
+    if (e.key === 'Escape') {
+      if (!editModal.classList.contains('hidden')) {
+        closeEditModal();
+      } else if (!dataDropdownMenu.classList.contains('hidden')) {
+        dataDropdownMenu.classList.add('hidden');
+      } else if (document.activeElement === taskSearchInput && taskSearchInput.value) {
+        clearSearchBtn.click();
+      }
+    }
+  });
+
+  // --- Helpers ---
+  function formatDateDisplay(dateStr) {
+    if (!dateStr) return '';
+    try {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+      return dateStr;
+    } catch {
+      return dateStr;
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // --- Speech to Text (Web Speech API) ---
+  function setupSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const voiceInputBtn = document.getElementById('voice-input-btn');
+    const voiceStatusBar = document.getElementById('voice-status-bar');
+    const voiceStatusText = document.getElementById('voice-status-text');
+    const voiceStopBtn = document.getElementById('voice-stop-btn');
+
+    if (!voiceInputBtn) return;
+
+    if (!SpeechRecognition) {
+      voiceInputBtn.title = 'Speech to text is not supported in this browser';
+      voiceInputBtn.addEventListener('click', () => {
+        showToast('Speech recognition is not supported in this browser. Please use Chrome, Edge, or the Android app!', 'error');
+      });
+      document.querySelectorAll('.voice-field-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          showToast('Speech recognition not supported in this browser', 'error');
+        });
+      });
+      return;
+    }
+
+    let recognition = null;
+    let isListening = false;
+    let activeVoiceTarget = null;
+    let baseTranscript = '';
+
+    try {
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = navigator.language || 'en-US';
+    } catch (e) {
+      console.warn('SpeechRecognition init error:', e);
+      return;
+    }
+
+    function startListening(targetInput, triggerBtn) {
+      if (isListening) {
+        stopListening();
+        if (activeVoiceTarget === targetInput) return;
+      }
+
+      try {
+        activeVoiceTarget = targetInput;
+        baseTranscript = targetInput.value ? (targetInput.value.trim() + ' ') : '';
+        isListening = true;
+
+        recognition.start();
+
+        if (triggerBtn) triggerBtn.classList.add('is-listening');
+        if (voiceInputBtn && (triggerBtn === voiceInputBtn || !triggerBtn)) {
+          voiceInputBtn.classList.add('is-listening');
+        }
+        if (voiceStatusBar) {
+          voiceStatusBar.classList.remove('hidden');
+          voiceStatusText.textContent = 'Listening... Speak your task now';
+        }
+        playUiSound('add');
+        showToast('Microphone active. Speak now...', 'info');
+      } catch (err) {
+        console.warn('Speech start error:', err);
+        stopListening();
+      }
+    }
+
+    function stopListening() {
+      if (!isListening && !recognition) return;
+      isListening = false;
+      try {
+        recognition.stop();
+      } catch (e) {}
+
+      document.querySelectorAll('.is-listening').forEach(el => el.classList.remove('is-listening'));
+      if (voiceStatusBar) {
+        voiceStatusBar.classList.add('hidden');
+      }
+      if (activeVoiceTarget) {
+        activeVoiceTarget.focus();
+      }
+      activeVoiceTarget = null;
+    }
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      let newlyFinalized = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          newlyFinalized += event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+
+      if (newlyFinalized) {
+        baseTranscript += newlyFinalized + ' ';
+      }
+
+      const combinedText = (baseTranscript + interim).trim();
+      if (activeVoiceTarget) {
+        activeVoiceTarget.value = combinedText;
+        activeVoiceTarget.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+
+      if (voiceStatusText) {
+        voiceStatusText.textContent = interim ? `"${interim}"` : 'Listening... Speak now';
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.warn('Speech error event:', event.error);
+      if (event.error === 'not-allowed') {
+        showToast('Microphone permission denied. Please allow microphone access.', 'error');
+        stopListening();
+      } else if (event.error === 'no-speech') {
+        // Just silent pause, keep listening or wait
+      } else {
+        showToast(`Voice input: ${event.error}`, 'info');
+        stopListening();
+      }
+    };
+
+    recognition.onend = () => {
+      if (isListening) {
+        try {
+          recognition.start();
+        } catch (e) {
+          stopListening();
+        }
+      } else {
+        stopListening();
+      }
+    };
+
+    voiceInputBtn.addEventListener('click', () => {
+      if (isListening && activeVoiceTarget === taskTitleInput) {
+        stopListening();
+      } else {
+        startListening(taskTitleInput, voiceInputBtn);
+      }
+    });
+
+    if (voiceStopBtn) {
+      voiceStopBtn.addEventListener('click', () => {
+        stopListening();
+      });
+    }
+
+    document.querySelectorAll('.voice-field-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.voiceTarget;
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          if (isListening && activeVoiceTarget === targetEl) {
+            stopListening();
+          } else {
+            startListening(targetEl, btn);
+          }
+        }
+      });
+    });
+  }
+
+  // --- Setup Event Listeners ---
+  themeToggleBtn.addEventListener('click', toggleTheme);
+  soundToggleBtn.addEventListener('click', toggleSound);
+
+  // --- Initialization ---
+  loadPersistedData();
+  updateGreetingAndDate();
+  setupSpeechRecognition();
+  renderTasks();
+
+  // Refresh clock every minute
+  setInterval(updateGreetingAndDate, 60000);
+
+})();
+
+</script>
+</body>
+</html>
+

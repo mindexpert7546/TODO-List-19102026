@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "💬 Ask a Question / Community Discussion"
+    url: "https://github.com"
+    about: "For general questions, troubleshooting, or ideas that don't fit a bug or feature request."
+  - name: "📖 TaskFlow Documentation"
+    url: "https://github.com"
+    about: "Read setup instructions, contributing guidelines, and architecture details."
