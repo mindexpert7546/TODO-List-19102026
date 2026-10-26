@@ -139,11 +139,23 @@
   const exportJsonBtn = document.getElementById('export-json-btn');
   const importJsonInput = document.getElementById('import-json-input');
   const resetSampleBtn = document.getElementById('reset-sample-btn');
+  const exportExcelMenuBtn = document.getElementById('export-excel-menu-btn');
+  const exportCsvMenuBtn = document.getElementById('export-csv-menu-btn');
 
-  // Bulk buttons
+  // Bulk & Export toolbar buttons
+  const exportExcelBtn = document.getElementById('export-excel-btn');
+  const exportOptionsToggleBtn = document.getElementById('export-options-toggle-btn');
+  const exportQuickMenu = document.getElementById('export-quick-menu');
+  const exportAllExcelBtn = document.getElementById('export-all-excel-btn');
+  const exportFilteredExcelBtn = document.getElementById('export-filtered-excel-btn');
+  const exportCsvQuickBtn = document.getElementById('export-csv-quick-btn');
+  const exportAllCountBadge = document.getElementById('export-all-count-badge');
+  const exportFilteredCountBadge = document.getElementById('export-filtered-count-badge');
   const markAllDoneBtn = document.getElementById('mark-all-done-btn');
   const clearCompletedBtn = document.getElementById('clear-completed-btn');
   const emptyAddBtn = document.getElementById('empty-add-btn');
+  const mobileAddFab = document.getElementById('mobile-add-fab');
+  const metaThemeColor = document.getElementById('meta-theme-color');
 
   // Edit Modal Elements
   const editModal = document.getElementById('edit-modal');
@@ -325,26 +337,39 @@
   // --- LocalStorage & State Persistence ---
   function loadPersistedData() {
     // Tasks
-    const storedTasks = localStorage.getItem('taskflow_tasks');
-    if (storedTasks) {
-      try {
-        tasks = JSON.parse(storedTasks);
-      } catch {
+    try {
+      const storedTasks = localStorage.getItem('taskflow_tasks');
+      if (storedTasks) {
+        try {
+          tasks = JSON.parse(storedTasks);
+        } catch {
+          tasks = [...DEFAULT_SAMPLE_TASKS];
+        }
+      } else {
         tasks = [...DEFAULT_SAMPLE_TASKS];
+        saveTasksToStorage();
       }
-    } else {
+    } catch {
       tasks = [...DEFAULT_SAMPLE_TASKS];
-      saveTasksToStorage();
     }
 
     // Theme
-    const savedTheme = localStorage.getItem('taskflow_theme') || 'dark';
+    let savedTheme = 'dark';
+    try {
+      savedTheme = localStorage.getItem('taskflow_theme') || 'dark';
+    } catch {
+      savedTheme = 'dark';
+    }
     applyTheme(savedTheme);
 
     // Sound
-    const savedSound = localStorage.getItem('taskflow_sound');
-    if (savedSound !== null) {
-      isSoundEnabled = savedSound === 'true';
+    try {
+      const savedSound = localStorage.getItem('taskflow_sound');
+      if (savedSound !== null) {
+        isSoundEnabled = savedSound === 'true';
+      }
+    } catch {
+      isSoundEnabled = true;
     }
     updateSoundButtonUi();
 
@@ -353,13 +378,22 @@
   }
 
   function saveTasksToStorage() {
-    localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
+    try {
+      localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
+    } catch (e) {
+      console.warn('LocalStorage save failed:', e);
+    }
   }
 
   // --- Theme Management ---
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('taskflow_theme', theme);
+    try {
+      localStorage.setItem('taskflow_theme', theme);
+    } catch {}
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#0b0f19' : '#f1f5f9');
+    }
     if (theme === 'dark') {
       themeIconSun.classList.add('hidden');
       themeIconMoon.classList.remove('hidden');
@@ -379,7 +413,9 @@
   // --- Sound Management ---
   function toggleSound() {
     isSoundEnabled = !isSoundEnabled;
-    localStorage.setItem('taskflow_sound', isSoundEnabled);
+    try {
+      localStorage.setItem('taskflow_sound', isSoundEnabled);
+    } catch {}
     updateSoundButtonUi();
     showToast(`Sound FX ${isSoundEnabled ? 'Enabled' : 'Muted'}`, 'info');
     if (isSoundEnabled) {
@@ -522,9 +558,22 @@
     }
   }
 
+  // --- Update Export Badges ---
+  function updateExportBadges() {
+    const totalCount = tasks.length;
+    const filteredCount = getFilteredAndSortedTasks().length;
+    if (exportAllCountBadge) {
+      exportAllCountBadge.textContent = `(${totalCount})`;
+    }
+    if (exportFilteredCountBadge) {
+      exportFilteredCountBadge.textContent = `(${filteredCount})`;
+    }
+  }
+
   // --- Render Tasks Feed ---
   function renderTasks() {
     updateDashboardStats();
+    updateExportBadges();
     const visibleTasks = getFilteredAndSortedTasks();
     taskListEl.innerHTML = '';
 
@@ -1049,16 +1098,659 @@
   });
 
   // --- Data Import & Export ---
+
+  // Export Quick Menu Toggle helpers
+  function closeExportQuickMenu() {
+    if (exportQuickMenu && !exportQuickMenu.classList.contains('hidden')) {
+      exportQuickMenu.classList.add('hidden');
+      if (exportOptionsToggleBtn) {
+        exportOptionsToggleBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  }
+
+  function toggleExportQuickMenu(e) {
+    e.stopPropagation();
+    if (exportQuickMenu) {
+      const isHidden = exportQuickMenu.classList.toggle('hidden');
+      if (exportOptionsToggleBtn) {
+        exportOptionsToggleBtn.setAttribute('aria-expanded', String(!isHidden));
+      }
+    }
+  }
+
+  // --- Pure Vanilla OpenXML (.xlsx) & CSV Generation Engine ---
+
+  // Precomputed CRC32 table for ZIP packaging
+  const crc32Table = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let k = 0; k < 8; k++) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    crc32Table[i] = c >>> 0;
+  }
+
+  function calculateCrc32(bytes) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) {
+      c = (c >>> 8) ^ crc32Table[(c ^ bytes[i]) & 0xFF];
+    }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function createZipArchive(files) {
+    const encoder = new TextEncoder();
+    const fileEntries = files.map(file => {
+      const dataBytes = typeof file.data === 'string' ? encoder.encode(file.data) : file.data;
+      const nameBytes = encoder.encode(file.name);
+      const crc = calculateCrc32(dataBytes);
+      return {
+        nameBytes,
+        dataBytes,
+        crc,
+        size: dataBytes.length
+      };
+    });
+
+    const now = new Date();
+    const dosTime = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)) & 0xFFFF;
+    const dosDate = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xFFFF;
+
+    let totalArchiveSize = 0;
+    fileEntries.forEach(entry => {
+      entry.localHeaderOffset = totalArchiveSize;
+      totalArchiveSize += 30 + entry.nameBytes.length + entry.size;
+    });
+
+    const cdOffset = totalArchiveSize;
+    let cdSize = 0;
+    fileEntries.forEach(entry => {
+      cdSize += 46 + entry.nameBytes.length;
+    });
+    totalArchiveSize += cdSize + 22;
+
+    const buffer = new Uint8Array(totalArchiveSize);
+    const view = new DataView(buffer.buffer);
+    let pos = 0;
+
+    // 1. Write Local File Headers & File Data
+    fileEntries.forEach(entry => {
+      view.setUint32(pos, 0x04034b50, true); pos += 4;
+      view.setUint16(pos, 20, true); pos += 2;
+      view.setUint16(pos, 0x0800, true); pos += 2; // UTF-8
+      view.setUint16(pos, 0, true); pos += 2; // Store (no compression)
+      view.setUint16(pos, dosTime, true); pos += 2;
+      view.setUint16(pos, dosDate, true); pos += 2;
+      view.setUint32(pos, entry.crc, true); pos += 4;
+      view.setUint32(pos, entry.size, true); pos += 4; // compressed size
+      view.setUint32(pos, entry.size, true); pos += 4; // uncompressed size
+      view.setUint16(pos, entry.nameBytes.length, true); pos += 2;
+      view.setUint16(pos, 0, true); pos += 2; // extra field length
+
+      buffer.set(entry.nameBytes, pos); pos += entry.nameBytes.length;
+      buffer.set(entry.dataBytes, pos); pos += entry.size;
+    });
+
+    // 2. Write Central Directory Headers
+    fileEntries.forEach(entry => {
+      view.setUint32(pos, 0x02014b50, true); pos += 4;
+      view.setUint16(pos, 20, true); pos += 2; // made by
+      view.setUint16(pos, 20, true); pos += 2; // needed
+      view.setUint16(pos, 0x0800, true); pos += 2; // UTF-8
+      view.setUint16(pos, 0, true); pos += 2; // Store
+      view.setUint16(pos, dosTime, true); pos += 2;
+      view.setUint16(pos, dosDate, true); pos += 2;
+      view.setUint32(pos, entry.crc, true); pos += 4;
+      view.setUint32(pos, entry.size, true); pos += 4;
+      view.setUint32(pos, entry.size, true); pos += 4;
+      view.setUint16(pos, entry.nameBytes.length, true); pos += 2;
+      view.setUint16(pos, 0, true); pos += 2; // extra len
+      view.setUint16(pos, 0, true); pos += 2; // comment len
+      view.setUint16(pos, 0, true); pos += 2; // disk start
+      view.setUint16(pos, 0, true); pos += 2; // internal attr
+      view.setUint32(pos, 0, true); pos += 4; // external attr
+      view.setUint32(pos, entry.localHeaderOffset, true); pos += 4;
+
+      buffer.set(entry.nameBytes, pos); pos += entry.nameBytes.length;
+    });
+
+    // 3. Write End of Central Directory (EOCD)
+    view.setUint32(pos, 0x06054b50, true); pos += 4;
+    view.setUint16(pos, 0, true); pos += 2;
+    view.setUint16(pos, 0, true); pos += 2;
+    view.setUint16(pos, fileEntries.length, true); pos += 2;
+    view.setUint16(pos, fileEntries.length, true); pos += 2;
+    view.setUint32(pos, cdSize, true); pos += 4;
+    view.setUint32(pos, cdOffset, true); pos += 4;
+    view.setUint16(pos, 0, true); pos += 2;
+
+    return buffer;
+  }
+
+  function escapeXml(unsafe) {
+    if (unsafe === null || unsafe === undefined) return '';
+    return String(unsafe)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;')
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+  }
+
+  function capitalizeFirstLetter(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  function getExcelCellRef(colIdx, rowIdx) {
+    let colName = '';
+    let temp = colIdx;
+    while (temp > 0) {
+      const rem = (temp - 1) % 26;
+      colName = String.fromCharCode(65 + rem) + colName;
+      temp = Math.floor((temp - 1) / 26);
+    }
+    return `${colName}${rowIdx}`;
+  }
+
+  function buildTasksXlsxZip(tasksToExport, scopeDescription = 'All Tasks') {
+    const todayStr = getRelativeDateString(0);
+    const exportTimeStr = new Date().toLocaleString('en-US');
+
+    // 1. [Content_Types].xml
+    const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>`;
+
+    // 2. _rels/.rels
+    const rootRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`;
+
+    // 3. xl/_rels/workbook.xml.rels
+    const workbookRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`;
+
+    // 4. xl/workbook.xml
+    const workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <workbookPr date1904="false"/>
+  <bookViews>
+    <workbookView xWindow="0" yWindow="0" windowWidth="20480" windowHeight="10240"/>
+  </bookViews>
+  <sheets>
+    <sheet name="Tasks" sheetId="1" r:id="rId1"/>
+    <sheet name="Analytics &amp; Summary" sheetId="2" r:id="rId2"/>
+  </sheets>
+</workbook>`;
+
+    // 5. xl/styles.xml
+    const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="8">
+    <font><sz val="11"/><name val="Calibri"/><color rgb="FF1E293B"/></font>
+    <font><b/><sz val="11"/><name val="Calibri"/><color rgb="FFFFFFFF"/></font>
+    <font><b/><sz val="10.5"/><name val="Calibri"/><color rgb="FF047857"/></font>
+    <font><b/><sz val="10.5"/><name val="Calibri"/><color rgb="FF0E7490"/></font>
+    <font><b/><sz val="10.5"/><name val="Calibri"/><color rgb="FFBE123C"/></font>
+    <font><b/><sz val="10.5"/><name val="Calibri"/><color rgb="FFB45309"/></font>
+    <font><b/><sz val="10.5"/><name val="Calibri"/><color rgb="FF15803D"/></font>
+    <font><sz val="10"/><name val="Calibri"/><color rgb="FF64748B"/></font>
+  </fonts>
+  <fills count="10">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF4F46E5"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFF8FAFC"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFECFDF5"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFECFEFF"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFF1F5F9"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFFFF1F2"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFFFFBEB"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFF0FDF4"/></patternFill></fill>
+  </fills>
+  <borders count="3">
+    <border><left/><right/><top/><bottom/><diagonal/></border>
+    <border>
+      <left style="thin"><color rgb="FFCBD5E1"/></left>
+      <right style="thin"><color rgb="FFCBD5E1"/></right>
+      <top style="thin"><color rgb="FFCBD5E1"/></top>
+      <bottom style="thin"><color rgb="FFCBD5E1"/></bottom>
+      <diagonal/>
+    </border>
+    <border>
+      <left style="thin"><color rgb="FF4338CA"/></left>
+      <right style="thin"><color rgb="FF4338CA"/></right>
+      <top style="thin"><color rgb="FF4338CA"/></top>
+      <bottom style="medium"><color rgb="FF3730A3"/></bottom>
+      <diagonal/>
+    </border>
+  </borders>
+  <cellStyleXfs count="1">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>
+  </cellStyleXfs>
+  <cellXfs count="14">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="2" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="3" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="3" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="2" fillId="4" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="3" fillId="5" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="7" fillId="6" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="4" fillId="7" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="5" fillId="8" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="6" fillId="9" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="7" fillId="0" borderId="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="7" fillId="3" borderId="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+  </cellXfs>
+</styleSheet>`;
+
+    // 6. xl/worksheets/sheet1.xml (Tasks Worksheet)
+    const taskHeaders = [
+      'Task ID',
+      'Task Title',
+      'Description / Notes',
+      'Status',
+      'Priority',
+      'Category',
+      'Due Date',
+      'Due Status',
+      'Created Date',
+      'Starred',
+      'Checklist Progress',
+      'Checklist Details'
+    ];
+
+    let sheet1DataRows = `<row r="1" ht="28" customHeight="1">`;
+    taskHeaders.forEach((header, idx) => {
+      const ref = getExcelCellRef(idx + 1, 1);
+      sheet1DataRows += `<c r="${ref}" s="1" t="inlineStr"><is><t>${escapeXml(header)}</t></is></c>`;
+    });
+    sheet1DataRows += `</row>`;
+
+    tasksToExport.forEach((task, rowIdx) => {
+      const r = rowIdx + 2;
+      const isEven = rowIdx % 2 === 1;
+      const totalSub = (task.subtasks || []).length;
+      const compSub = (task.subtasks || []).filter(s => s.completed).length;
+
+      let status = 'Pending';
+      let statusStyle = 8; // slate
+      if (task.completed) {
+        status = 'Completed';
+        statusStyle = 6; // green
+      } else if (totalSub > 0 && compSub > 0) {
+        status = 'In Progress';
+        statusStyle = 7; // cyan
+      }
+
+      let priorityStyle = 10; // medium
+      const p = (task.priority || 'medium').toLowerCase();
+      if (p === 'high') priorityStyle = 9;
+      else if (p === 'low') priorityStyle = 11;
+
+      let dueStatus = 'No Due Date';
+      let dueStyle = isEven ? 5 : 3;
+      if (task.completed) {
+        dueStatus = 'Completed';
+        dueStyle = 6;
+      } else if (task.dueDate) {
+        if (task.dueDate < todayStr) {
+          dueStatus = '⚠️ Overdue';
+          dueStyle = 9; // rose alert
+        } else if (task.dueDate === todayStr) {
+          dueStatus = '⚡ Due Today';
+          dueStyle = 10; // amber alert
+        } else {
+          dueStatus = 'Upcoming';
+        }
+      }
+
+      const createdStr = task.createdAt ? new Date(task.createdAt).toLocaleString('en-US') : '';
+      const progressStr = totalSub > 0 ? `${compSub}/${totalSub} (${Math.round((compSub / totalSub) * 100)}%)` : (task.completed ? '100%' : 'None');
+      const subtaskDetails = (task.subtasks || []).map(s => (s.completed ? '[✓] ' : '[ ] ') + s.title).join(' | ');
+
+      const defaultLeftStyle = isEven ? 4 : 2;
+      const defaultCenterStyle = isEven ? 5 : 3;
+      const subtaskStyle = isEven ? 13 : 12;
+
+      sheet1DataRows += `<row r="${r}" ht="24" customHeight="1">`;
+      // Col 1: ID
+      sheet1DataRows += `<c r="${getExcelCellRef(1, r)}" s="${defaultCenterStyle}" t="inlineStr"><is><t>${escapeXml(task.id)}</t></is></c>`;
+      // Col 2: Title
+      sheet1DataRows += `<c r="${getExcelCellRef(2, r)}" s="${defaultLeftStyle}" t="inlineStr"><is><t>${escapeXml(task.title)}</t></is></c>`;
+      // Col 3: Description
+      sheet1DataRows += `<c r="${getExcelCellRef(3, r)}" s="${defaultLeftStyle}" t="inlineStr"><is><t>${escapeXml(task.notes || '')}</t></is></c>`;
+      // Col 4: Status
+      sheet1DataRows += `<c r="${getExcelCellRef(4, r)}" s="${statusStyle}" t="inlineStr"><is><t>${escapeXml(status)}</t></is></c>`;
+      // Col 5: Priority
+      sheet1DataRows += `<c r="${getExcelCellRef(5, r)}" s="${priorityStyle}" t="inlineStr"><is><t>${escapeXml(capitalizeFirstLetter(task.priority || 'medium'))}</t></is></c>`;
+      // Col 6: Category
+      sheet1DataRows += `<c r="${getExcelCellRef(6, r)}" s="${defaultCenterStyle}" t="inlineStr"><is><t>${escapeXml(task.category || 'General')}</t></is></c>`;
+      // Col 7: Due Date
+      sheet1DataRows += `<c r="${getExcelCellRef(7, r)}" s="${defaultCenterStyle}" t="inlineStr"><is><t>${escapeXml(task.dueDate || '')}</t></is></c>`;
+      // Col 8: Due Status
+      sheet1DataRows += `<c r="${getExcelCellRef(8, r)}" s="${dueStyle}" t="inlineStr"><is><t>${escapeXml(dueStatus)}</t></is></c>`;
+      // Col 9: Created Date
+      sheet1DataRows += `<c r="${getExcelCellRef(9, r)}" s="${defaultCenterStyle}" t="inlineStr"><is><t>${escapeXml(createdStr)}</t></is></c>`;
+      // Col 10: Starred
+      sheet1DataRows += `<c r="${getExcelCellRef(10, r)}" s="${defaultCenterStyle}" t="inlineStr"><is><t>${task.starred ? '⭐ Starred' : 'No'}</t></is></c>`;
+      // Col 11: Progress
+      sheet1DataRows += `<c r="${getExcelCellRef(11, r)}" s="${defaultCenterStyle}" t="inlineStr"><is><t>${escapeXml(progressStr)}</t></is></c>`;
+      // Col 12: Subtasks
+      sheet1DataRows += `<c r="${getExcelCellRef(12, r)}" s="${subtaskStyle}" t="inlineStr"><is><t>${escapeXml(subtaskDetails)}</t></is></c>`;
+      sheet1DataRows += `</row>`;
+    });
+
+    const totalTaskRows = tasksToExport.length + 1;
+    const worksheet1Xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetViews>
+    <sheetView tabSelected="1" workbookViewId="0">
+      <pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>
+    </sheetView>
+  </sheetViews>
+  <cols>
+    <col min="1" max="1" width="13" customWidth="1"/>
+    <col min="2" max="2" width="38" customWidth="1"/>
+    <col min="3" max="3" width="42" customWidth="1"/>
+    <col min="4" max="4" width="16" customWidth="1"/>
+    <col min="5" max="5" width="14" customWidth="1"/>
+    <col min="6" max="6" width="16" customWidth="1"/>
+    <col min="7" max="7" width="14" customWidth="1"/>
+    <col min="8" max="8" width="18" customWidth="1"/>
+    <col min="9" max="9" width="22" customWidth="1"/>
+    <col min="10" max="10" width="14" customWidth="1"/>
+    <col min="11" max="11" width="20" customWidth="1"/>
+    <col min="12" max="12" width="48" customWidth="1"/>
+  </cols>
+  <sheetData>
+    ${sheet1DataRows}
+  </sheetData>
+  <autoFilter ref="A1:L${totalTaskRows}"/>
+</worksheet>`;
+
+    // 7. xl/worksheets/sheet2.xml (Analytics & Summary Worksheet)
+    const totalCount = tasksToExport.length;
+    const completedCount = tasksToExport.filter(t => t.completed).length;
+    const pendingCount = tasksToExport.filter(t => !t.completed).length;
+    const inProgressCount = tasksToExport.filter(t => !t.completed && (t.subtasks || []).some(s => s.completed)).length;
+    const highPriorityCount = tasksToExport.filter(t => (t.priority || '').toLowerCase() === 'high').length;
+    const overdueCount = tasksToExport.filter(t => !t.completed && t.dueDate && t.dueDate < todayStr).length;
+    const dueTodayCount = tasksToExport.filter(t => !t.completed && t.dueDate === todayStr).length;
+    const starredCount = tasksToExport.filter(t => t.starred).length;
+    const productivityPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+    const summaryMetrics = [
+      { metric: 'Total Exported Tasks', val: `${totalCount}`, note: 'Total tasks included in this spreadsheet export' },
+      { metric: 'Completed Tasks', val: `${completedCount}`, note: 'Tasks checked off and completed' },
+      { metric: 'In Progress Tasks', val: `${inProgressCount}`, note: 'Active tasks with partially completed checklist items' },
+      { metric: 'Pending Tasks', val: `${pendingCount}`, note: 'Active tasks remaining to be done' },
+      { metric: 'Productivity Score', val: `${productivityPercent}%`, note: 'Overall completion percentage' },
+      { metric: 'High Priority (Urgent)', val: `${highPriorityCount}`, note: 'Tasks designated as high focus' },
+      { metric: 'Overdue Tasks', val: `${overdueCount}`, note: 'Active tasks past their due date' },
+      { metric: 'Due Today', val: `${dueTodayCount}`, note: 'Tasks scheduled for completion today' },
+      { metric: 'Starred Milestones', val: `${starredCount}`, note: 'Tasks flagged with gold star for high importance' },
+      { metric: 'Export Scope', val: scopeDescription, note: 'Exported filter criteria applied' },
+      { metric: 'Export Timestamp', val: exportTimeStr, note: 'Generated by TaskFlow Productivity Manager' },
+      { metric: 'Application Architecture', val: 'Pure Vanilla Web Standards (Zero Runtime Dependency)', note: 'TaskFlow OpenXML Exporter' }
+    ];
+
+    let sheet2DataRows = `<row r="1" ht="28" customHeight="1">
+      <c r="A1" s="1" t="inlineStr"><is><t>Summary Metric</t></is></c>
+      <c r="B1" s="1" t="inlineStr"><is><t>Metric Value</t></is></c>
+      <c r="C1" s="1" t="inlineStr"><is><t>Notes &amp; Context</t></is></c>
+    </row>`;
+
+    summaryMetrics.forEach((m, idx) => {
+      const r = idx + 2;
+      const isEven = idx % 2 === 1;
+      const leftStyle = isEven ? 4 : 2;
+      const centerStyle = isEven ? 5 : 3;
+
+      sheet2DataRows += `<row r="${r}" ht="22" customHeight="1">
+        <c r="A${r}" s="${leftStyle}" t="inlineStr"><is><t>${escapeXml(m.metric)}</t></is></c>
+        <c r="B${r}" s="${centerStyle}" t="inlineStr"><is><t>${escapeXml(m.val)}</t></is></c>
+        <c r="C${r}" s="${leftStyle}" t="inlineStr"><is><t>${escapeXml(m.note)}</t></is></c>
+      </row>`;
+    });
+
+    const worksheet2Xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetViews>
+    <sheetView tabSelected="0" workbookViewId="0">
+      <pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>
+    </sheetView>
+  </sheetViews>
+  <cols>
+    <col min="1" max="1" width="30" customWidth="1"/>
+    <col min="2" max="2" width="25" customWidth="1"/>
+    <col min="3" max="3" width="50" customWidth="1"/>
+  </cols>
+  <sheetData>
+    ${sheet2DataRows}
+  </sheetData>
+  <autoFilter ref="A1:C${summaryMetrics.length + 1}"/>
+</worksheet>`;
+
+    const zipFiles = [
+      { name: '[Content_Types].xml', data: contentTypesXml },
+      { name: '_rels/.rels', data: rootRelsXml },
+      { name: 'xl/_rels/workbook.xml.rels', data: workbookRelsXml },
+      { name: 'xl/workbook.xml', data: workbookXml },
+      { name: 'xl/styles.xml', data: stylesXml },
+      { name: 'xl/worksheets/sheet1.xml', data: worksheet1Xml },
+      { name: 'xl/worksheets/sheet2.xml', data: worksheet2Xml }
+    ];
+
+    return createZipArchive(zipFiles);
+  }
+
+  function generateCsvContent(tasksToExport) {
+    const headers = [
+      'Task ID',
+      'Task Title',
+      'Description',
+      'Status',
+      'Priority',
+      'Category',
+      'Due Date',
+      'Due Status',
+      'Created Date',
+      'Starred',
+      'Checklist Progress',
+      'Checklist Details'
+    ];
+
+    function escapeCsvCell(val) {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    }
+
+    const todayStr = getRelativeDateString(0);
+    const rows = [headers.map(escapeCsvCell).join(',')];
+
+    tasksToExport.forEach(task => {
+      const totalSub = (task.subtasks || []).length;
+      const compSub = (task.subtasks || []).filter(s => s.completed).length;
+      let status = 'Pending';
+      if (task.completed) status = 'Completed';
+      else if (totalSub > 0 && compSub > 0) status = 'In Progress';
+
+      let dueStatus = 'No Due Date';
+      if (task.completed) dueStatus = 'Completed';
+      else if (task.dueDate) {
+        if (task.dueDate < todayStr) dueStatus = 'Overdue';
+        else if (task.dueDate === todayStr) dueStatus = 'Due Today';
+        else dueStatus = 'Upcoming';
+      }
+
+      const createdStr = task.createdAt ? new Date(task.createdAt).toLocaleString('en-US') : '';
+      const progressStr = totalSub > 0 ? `${compSub}/${totalSub} (${Math.round((compSub / totalSub) * 100)}%)` : (task.completed ? '100%' : 'None');
+      const subtaskDetails = (task.subtasks || []).map(s => (s.completed ? '[✓] ' : '[ ] ') + s.title).join(' | ');
+
+      const row = [
+        task.id,
+        task.title,
+        task.notes || '',
+        status,
+        capitalizeFirstLetter(task.priority || 'medium'),
+        task.category || 'General',
+        task.dueDate || '',
+        dueStatus,
+        createdStr,
+        task.starred ? 'Yes' : 'No',
+        progressStr,
+        subtaskDetails
+      ];
+      rows.push(row.map(escapeCsvCell).join(','));
+    });
+
+    // Add UTF-8 Byte Order Mark (\uFEFF) for immediate compatibility in Excel
+    return '\uFEFF' + rows.join('\r\n');
+  }
+
+  function triggerFileDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', url);
+    downloadAnchor.setAttribute('download', filename);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    setTimeout(() => {
+      downloadAnchor.remove();
+      URL.revokeObjectURL(url);
+    }, 300);
+  }
+
+  function exportTasksToExcel(tasksToExport, scopeDescription = 'All Tasks') {
+    if (!tasksToExport || tasksToExport.length === 0) {
+      showToast('No tasks available to export. Create a task first!', 'error');
+      return;
+    }
+
+    try {
+      const todayStr = getRelativeDateString(0);
+      const filename = `todo-list-export-${todayStr}.xlsx`;
+      const zipBytes = buildTasksXlsxZip(tasksToExport, scopeDescription);
+      const blob = new Blob([zipBytes], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      triggerFileDownload(blob, filename);
+      if (isSoundEnabled) playUiSound('complete');
+      showToast(`Exported ${tasksToExport.length} ${tasksToExport.length === 1 ? 'task' : 'tasks'} to ${filename}`, 'success');
+    } catch (err) {
+      console.error('Failed to export tasks to Excel:', err);
+      showToast('Export failed: ' + (err.message || 'Unable to generate Excel file'), 'error');
+    }
+  }
+
+  function exportTasksToCsv(tasksToExport, scopeDescription = 'All Tasks') {
+    if (!tasksToExport || tasksToExport.length === 0) {
+      showToast('No tasks available to export as CSV', 'error');
+      return;
+    }
+
+    try {
+      const todayStr = getRelativeDateString(0);
+      const filename = `todo-list-export-${todayStr}.csv`;
+      const csvContent = generateCsvContent(tasksToExport);
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      triggerFileDownload(blob, filename);
+      if (isSoundEnabled) playUiSound('complete');
+      showToast(`Exported ${tasksToExport.length} ${tasksToExport.length === 1 ? 'task' : 'tasks'} to ${filename}`, 'success');
+    } catch (err) {
+      console.error('Failed to export tasks to CSV:', err);
+      showToast('CSV export failed: ' + (err.message || 'Unable to generate CSV'), 'error');
+    }
+  }
+
+  // Header Dropdown Toggle
   dataMenuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     dataDropdownMenu.classList.toggle('hidden');
+    closeExportQuickMenu();
   });
 
-  document.addEventListener('click', () => {
+  // Global Outside Click to dismiss dropdowns
+  document.addEventListener('click', (e) => {
     if (!dataDropdownMenu.classList.contains('hidden')) {
       dataDropdownMenu.classList.add('hidden');
     }
+    if (exportQuickMenu && !exportQuickMenu.classList.contains('hidden')) {
+      if (!e.target.closest('.export-dropdown-wrapper')) {
+        closeExportQuickMenu();
+      }
+    }
   });
+
+  // Export Button Click Handlers
+  if (exportExcelBtn) {
+    // 1-Click direct export of all tasks by default
+    exportExcelBtn.addEventListener('click', () => {
+      exportTasksToExcel(tasks, 'All Tasks');
+    });
+  }
+
+  if (exportOptionsToggleBtn) {
+    exportOptionsToggleBtn.addEventListener('click', toggleExportQuickMenu);
+  }
+
+  if (exportAllExcelBtn) {
+    exportAllExcelBtn.addEventListener('click', () => {
+      closeExportQuickMenu();
+      exportTasksToExcel(tasks, 'All Tasks');
+    });
+  }
+
+  if (exportFilteredExcelBtn) {
+    exportFilteredExcelBtn.addEventListener('click', () => {
+      closeExportQuickMenu();
+      const filtered = getFilteredAndSortedTasks();
+      if (filtered.length === 0) {
+        showToast('No tasks match the active filter or search query', 'info');
+        return;
+      }
+      exportTasksToExcel(filtered, `Filtered View (${currentFilter}, ${currentCategory})`);
+    });
+  }
+
+  if (exportCsvQuickBtn) {
+    exportCsvQuickBtn.addEventListener('click', () => {
+      closeExportQuickMenu();
+      exportTasksToCsv(tasks, 'All Tasks');
+    });
+  }
+
+  if (exportExcelMenuBtn) {
+    exportExcelMenuBtn.addEventListener('click', () => {
+      if (dataDropdownMenu) dataDropdownMenu.classList.add('hidden');
+      exportTasksToExcel(tasks, 'All Tasks');
+    });
+  }
+
+  if (exportCsvMenuBtn) {
+    exportCsvMenuBtn.addEventListener('click', () => {
+      if (dataDropdownMenu) dataDropdownMenu.classList.add('hidden');
+      exportTasksToCsv(tasks, 'All Tasks');
+    });
+  }
 
   exportJsonBtn.addEventListener('click', () => {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(tasks, null, 2));
@@ -1176,12 +1868,14 @@
       return;
     }
 
-    // Escape closes modals and search
+    // Escape closes modals, menus, and search
     if (e.key === 'Escape') {
       if (!editModal.classList.contains('hidden')) {
         closeEditModal();
       } else if (!dataDropdownMenu.classList.contains('hidden')) {
         dataDropdownMenu.classList.add('hidden');
+      } else if (exportQuickMenu && !exportQuickMenu.classList.contains('hidden')) {
+        closeExportQuickMenu();
       } else if (document.activeElement === taskSearchInput && taskSearchInput.value) {
         clearSearchBtn.click();
       }
@@ -1381,6 +2075,41 @@
   // --- Setup Event Listeners ---
   themeToggleBtn.addEventListener('click', toggleTheme);
   soundToggleBtn.addEventListener('click', toggleSound);
+
+  // --- Mobile Quick Add FAB Handling ---
+  if (mobileAddFab) {
+    mobileAddFab.addEventListener('click', () => {
+      if (newTaskForm) {
+        newTaskForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          if (taskTitleInput) taskTitleInput.focus();
+        }, 320);
+      }
+    });
+
+    if ('IntersectionObserver' in window && newTaskForm) {
+      const fabObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            mobileAddFab.classList.add('hidden-fab');
+          } else {
+            mobileAddFab.classList.remove('hidden-fab');
+          }
+        });
+      }, { threshold: 0.15 });
+      fabObserver.observe(newTaskForm);
+    } else {
+      window.addEventListener('scroll', () => {
+        if (!newTaskForm) return;
+        const rect = newTaskForm.getBoundingClientRect();
+        if (rect.bottom < 60) {
+          mobileAddFab.classList.remove('hidden-fab');
+        } else {
+          mobileAddFab.classList.add('hidden-fab');
+        }
+      }, { passive: true });
+    }
+  }
 
   // --- Initialization ---
   loadPersistedData();

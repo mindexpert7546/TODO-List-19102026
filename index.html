@@ -2,7 +2,12 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f19" id="meta-theme-color">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TaskFlow">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="description" content="TaskFlow - A modern, high-performance To-Do and Task Management web application featuring glassmorphism design, priority filters, smart categories, subtasks, and instant local persistence.">
   <meta name="keywords" content="todo list, task manager, productivity app, todo app, task tracker">
   <meta name="author" content="TaskFlow Productivity">
@@ -19,10 +24,12 @@
   <!-- Canvas for celebratory particle confetti -->
   <canvas id="confetti-canvas"></canvas>
 
-  <div class="app-background">
+  <div class="app-background" id="app-background">
     <div class="glow-orb orb-1"></div>
     <div class="glow-orb orb-2"></div>
     <div class="glow-orb orb-3"></div>
+    <div class="bg-mesh-layer"></div>
+    <div class="bg-dots-layer"></div>
   </div>
 
   <div class="app-container">
@@ -66,8 +73,8 @@
           </svg>
         </button>
 
-        <!-- Theme Toggle -->
-        <button id="theme-toggle-btn" class="icon-button" aria-label="Toggle Dark and Light Theme" title="Toggle Theme">
+        <!-- Theme Quick Toggle -->
+        <button id="theme-toggle-btn" class="icon-button" aria-label="Toggle Dark and Light Theme" title="Toggle Light/Dark Theme">
           <svg id="theme-icon-sun" class="btn-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -84,6 +91,17 @@
           </svg>
         </button>
 
+        <!-- Appearance & Themes Modal Open Button -->
+        <button id="theme-modal-open-btn" class="icon-button" aria-label="Appearance and Color Themes" title="Customize Themes & Appearance (Press T)">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+          </svg>
+        </button>
+
         <!-- Data Actions Dropdown Button -->
         <div class="dropdown-wrapper">
           <button id="data-menu-btn" class="icon-button" aria-label="Data Import and Export" title="Backup & Restore">
@@ -94,6 +112,24 @@
             </svg>
           </button>
           <div id="data-dropdown-menu" class="dropdown-menu hidden">
+            <button id="appearance-menu-btn" class="dropdown-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+                <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+                <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+                <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+              </svg>
+              Appearance &amp; Themes
+            </button>
+            <button id="export-excel-menu-btn" class="dropdown-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M8 13h8M8 17h8M10 9h4"></path></svg>
+              Export Excel (.xlsx)
+            </button>
+            <button id="export-csv-menu-btn" class="dropdown-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
+              Export CSV (.csv)
+            </button>
             <button id="export-json-btn" class="dropdown-item">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
               Export JSON
@@ -383,6 +419,35 @@
               <span id="active-filter-summary">Showing all tasks</span>
             </div>
             <div class="bulk-btn-group">
+              <!-- Export to Excel Button & Dropdown Options -->
+              <div class="export-dropdown-wrapper">
+                <button id="export-excel-btn" class="subtle-link-btn export-btn" title="Export tasks to Excel spreadsheet (.xlsx)" aria-label="Export to Excel">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <path d="M8 13h8M8 17h8M10 9h4"></path>
+                  </svg>
+                  <span>Export to Excel</span>
+                </button>
+                <button id="export-options-toggle-btn" class="subtle-link-btn export-toggle-btn" title="More export options" aria-label="More export options" aria-expanded="false" aria-haspopup="true">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div id="export-quick-menu" class="dropdown-menu export-quick-menu hidden">
+                  <button id="export-all-excel-btn" class="dropdown-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M8 13h8M8 17h8"></path></svg>
+                    <span>Export All Tasks (.xlsx) <small id="export-all-count-badge" class="menu-badge">(0)</small></span>
+                  </button>
+                  <button id="export-filtered-excel-btn" class="dropdown-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                    <span>Export Filtered Tasks (.xlsx) <small id="export-filtered-count-badge" class="menu-badge">(0)</small></span>
+                  </button>
+                  <button id="export-csv-quick-btn" class="dropdown-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Export as CSV (.csv)</span>
+                  </button>
+                </div>
+              </div>
+
               <button id="mark-all-done-btn" class="subtle-link-btn" title="Mark visible tasks completed">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 Complete All
@@ -428,6 +493,7 @@
       <div class="footer-shortcuts">
         <span><kbd>Enter</kbd> Add Task</span>
         <span><kbd>/</kbd> Quick Search</span>
+        <span><kbd>T</kbd> Themes</span>
         <span><kbd>Esc</kbd> Close Modals</span>
       </div>
       <p class="footer-credit">TaskFlow &bull; Engineered for clarity, speed, and elegance &bull; Saves automatically</p>
@@ -437,6 +503,7 @@
   <!-- Edit Task Modal -->
   <div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
     <div class="modal-dialog glass-card">
+      <div class="sheet-drag-handle" aria-hidden="true"></div>
       <div class="modal-header">
         <h3 id="edit-modal-title" class="modal-title">Edit Task Details</h3>
         <button id="close-modal-btn" class="icon-button close-btn" aria-label="Close dialog">✕</button>
@@ -510,8 +577,376 @@
     </div>
   </div>
 
+  <!-- Appearance & Themes Customizer Modal -->
+  <div id="theme-settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="theme-modal-title">
+    <div class="modal-dialog theme-modal-dialog glass-card">
+      <div class="sheet-drag-handle" aria-hidden="true"></div>
+      <div class="modal-header">
+        <div class="modal-header-brand">
+          <div class="modal-header-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+              <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+              <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+              <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 id="theme-modal-title" class="modal-title">Appearance &amp; Themes</h3>
+            <p class="modal-subtitle">Personalize your workspace aesthetic, modes, and colors</p>
+          </div>
+        </div>
+        <button id="close-theme-modal-btn" class="icon-button close-btn" aria-label="Close appearance settings">✕</button>
+      </div>
+
+      <div class="modal-body theme-modal-body">
+        <!-- Live Theme Preview Sandbox -->
+        <div class="theme-preview-wrapper">
+          <div class="theme-preview-header-bar">
+            <span class="preview-badge-label">
+              <span class="live-pulse-dot"></span> Live Theme Preview
+            </span>
+            <span class="preview-theme-indicator" id="preview-active-name">TaskFlow Indigo</span>
+          </div>
+
+          <div class="theme-preview-sandbox" id="theme-preview-box" data-theme="dark" data-theme-preset="default" data-bg-style="orbs">
+            <div class="preview-mini-background">
+              <div class="preview-glow-orb preview-orb-1"></div>
+              <div class="preview-glow-orb preview-orb-2"></div>
+              <div class="preview-mesh-layer"></div>
+              <div class="preview-dots-layer"></div>
+            </div>
+
+            <!-- Mini Task Card in Preview -->
+            <div class="preview-task-card">
+              <div class="preview-task-top">
+                <div class="preview-checkbox checked">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <div class="preview-task-text">
+                  <span class="preview-task-title">Launch high-productivity workspace</span>
+                  <span class="preview-task-desc">Sleek glassmorphism with accessible contrast</span>
+                </div>
+                <div class="preview-star-icon">⭐</div>
+              </div>
+
+              <div class="preview-tags-row">
+                <span class="badge-pill badge-cat-Work">Work</span>
+                <span class="badge-pill badge-priority-high">🔴 High</span>
+                <span class="badge-pill badge-status badge-status-inprogress" id="preview-status-pill">
+                  <span class="status-icon">🔄</span> In Progress
+                </span>
+                <span class="badge-pill badge-due is-today">⚡ Today</span>
+              </div>
+            </div>
+
+            <!-- Mini Action & Progress Bar -->
+            <div class="preview-bottom-bar">
+              <div class="preview-progress-track">
+                <div class="preview-progress-fill" style="width: 70%;"></div>
+              </div>
+              <button type="button" class="primary-gradient-btn preview-sample-btn">
+                <span>Active Accent</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 1: Appearance Mode -->
+        <div class="theme-section">
+          <div class="theme-section-title-wrap">
+            <h4 class="theme-section-title">Appearance Mode</h4>
+            <p class="theme-section-desc">Select light, dark, or automatic system appearance</p>
+          </div>
+          <div class="mode-options-grid" role="radiogroup" aria-label="Appearance Mode">
+            <button type="button" class="mode-card" data-mode="light" role="radio" aria-checked="false">
+              <div class="mode-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+              </div>
+              <span class="mode-name">Light Mode</span>
+              <span class="mode-desc">Crisp, clean daytime theme</span>
+            </button>
+
+            <button type="button" class="mode-card active" data-mode="dark" role="radio" aria-checked="true">
+              <div class="mode-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </div>
+              <span class="mode-name">Dark Mode</span>
+              <span class="mode-desc">Deep glassmorphism for low-light</span>
+            </button>
+
+            <button type="button" class="mode-card" data-mode="system" role="radio" aria-checked="false">
+              <div class="mode-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+              </div>
+              <span class="mode-name">System Auto</span>
+              <span class="mode-desc">Sync with OS preference</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 2: Color Theme Presets -->
+        <div class="theme-section">
+          <div class="theme-section-title-wrap">
+            <h4 class="theme-section-title">Color Theme Presets</h4>
+            <p class="theme-section-desc">Handcrafted color schemes tailored for focus and aesthetics</p>
+          </div>
+          <div class="theme-presets-grid" role="radiogroup" aria-label="Color Themes">
+            <!-- Preset: Default Indigo -->
+            <button type="button" class="preset-card active" data-preset="default" role="radio" aria-checked="true">
+              <div class="preset-swatches">
+                <span class="swatch-bubble" style="background: #6366f1;"></span>
+                <span class="swatch-bubble" style="background: #06b6d4;"></span>
+              </div>
+              <div class="preset-info">
+                <span class="preset-name">TaskFlow Indigo</span>
+                <span class="preset-tag">Default Signature</span>
+              </div>
+              <div class="preset-check">✓</div>
+            </button>
+
+            <!-- Preset: Ocean Blue -->
+            <button type="button" class="preset-card" data-preset="ocean-blue" role="radio" aria-checked="false">
+              <div class="preset-swatches">
+                <span class="swatch-bubble" style="background: #0284c7;"></span>
+                <span class="swatch-bubble" style="background: #06b6d4;"></span>
+              </div>
+              <div class="preset-info">
+                <span class="preset-name">Ocean Blue</span>
+                <span class="preset-tag">Sapphire &amp; Aqua</span>
+              </div>
+              <div class="preset-check">✓</div>
+            </button>
+
+            <!-- Preset: Forest Green -->
+            <button type="button" class="preset-card" data-preset="forest-green" role="radio" aria-checked="false">
+              <div class="preset-swatches">
+                <span class="swatch-bubble" style="background: #059669;"></span>
+                <span class="swatch-bubble" style="background: #34d399;"></span>
+              </div>
+              <div class="preset-info">
+                <span class="preset-name">Forest Green</span>
+                <span class="preset-tag">Emerald &amp; Mint</span>
+              </div>
+              <div class="preset-check">✓</div>
+            </button>
+
+            <!-- Preset: Purple Dream -->
+            <button type="button" class="preset-card" data-preset="purple-dream" role="radio" aria-checked="false">
+              <div class="preset-swatches">
+                <span class="swatch-bubble" style="background: #7c3aed;"></span>
+                <span class="swatch-bubble" style="background: #d946ef;"></span>
+              </div>
+              <div class="preset-info">
+                <span class="preset-name">Purple Dream</span>
+                <span class="preset-tag">Violet &amp; Magenta</span>
+              </div>
+              <div class="preset-check">✓</div>
+            </button>
+
+            <!-- Preset: Sunset Orange -->
+            <button type="button" class="preset-card" data-preset="sunset-orange" role="radio" aria-checked="false">
+              <div class="preset-swatches">
+                <span class="swatch-bubble" style="background: #ea580c;"></span>
+                <span class="swatch-bubble" style="background: #f59e0b;"></span>
+              </div>
+              <div class="preset-info">
+                <span class="preset-name">Sunset Orange</span>
+                <span class="preset-tag">Coral &amp; Amber</span>
+              </div>
+              <div class="preset-check">✓</div>
+            </button>
+
+            <!-- Preset: Rose Pink -->
+            <button type="button" class="preset-card" data-preset="rose-pink" role="radio" aria-checked="false">
+              <div class="preset-swatches">
+                <span class="swatch-bubble" style="background: #e11d48;"></span>
+                <span class="swatch-bubble" style="background: #fb7185;"></span>
+              </div>
+              <div class="preset-info">
+                <span class="preset-name">Rose Pink</span>
+                <span class="preset-tag">Ruby &amp; Blush</span>
+              </div>
+              <div class="preset-check">✓</div>
+            </button>
+
+            <!-- Preset: Midnight -->
+            <button type="button" class="preset-card" data-preset="midnight" role="radio" aria-checked="false">
+              <div class="preset-swatches">
+                <span class="swatch-bubble" style="background: #030712; border: 1px solid rgba(255,255,255,0.25);"></span>
+                <span class="swatch-bubble" style="background: #818cf8;"></span>
+              </div>
+              <div class="preset-info">
+                <span class="preset-name">Midnight</span>
+                <span class="preset-tag">Stealth Onyx</span>
+              </div>
+              <div class="preset-check">✓</div>
+            </button>
+
+            <!-- Preset: Custom -->
+            <button type="button" class="preset-card" data-preset="custom" role="radio" aria-checked="false" id="preset-card-custom">
+              <div class="preset-swatches">
+                <span class="swatch-bubble custom-swatch-display" id="custom-swatch-bubble" style="background: #6366f1;"></span>
+                <span class="swatch-bubble" style="background: linear-gradient(135deg, #f43f5e, #8b5cf6, #06b6d4);"></span>
+              </div>
+              <div class="preset-info">
+                <span class="preset-name">Custom Accent</span>
+                <span class="preset-tag" id="custom-accent-label">Personal Hex Code</span>
+              </div>
+              <div class="preset-check">✓</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 3: Custom Accent Color Picker -->
+        <div class="theme-section custom-accent-section" id="custom-accent-section">
+          <div class="theme-section-title-wrap">
+            <h4 class="theme-section-title">Custom Accent Color</h4>
+            <p class="theme-section-desc">Choose a curated accent or pick your own custom brand color</p>
+          </div>
+          <div class="custom-color-controls">
+            <div class="color-swatches-palette" aria-label="Curated accent colors">
+              <button type="button" class="color-dot active" data-color="#6366f1" style="--dot-color: #6366f1;" title="Indigo (#6366f1)"></button>
+              <button type="button" class="color-dot" data-color="#0284c7" style="--dot-color: #0284c7;" title="Sky Azure (#0284c7)"></button>
+              <button type="button" class="color-dot" data-color="#06b6d4" style="--dot-color: #06b6d4;" title="Cyan (#06b6d4)"></button>
+              <button type="button" class="color-dot" data-color="#10b981" style="--dot-color: #10b981;" title="Emerald (#10b981)"></button>
+              <button type="button" class="color-dot" data-color="#8b5cf6" style="--dot-color: #8b5cf6;" title="Violet (#8b5cf6)"></button>
+              <button type="button" class="color-dot" data-color="#ec4899" style="--dot-color: #ec4899;" title="Fuchsia (#ec4899)"></button>
+              <button type="button" class="color-dot" data-color="#f43f5e" style="--dot-color: #f43f5e;" title="Rose (#f43f5e)"></button>
+              <button type="button" class="color-dot" data-color="#f59e0b" style="--dot-color: #f59e0b;" title="Amber (#f59e0b)"></button>
+              <button type="button" class="color-dot" data-color="#ea580c" style="--dot-color: #ea580c;" title="Orange (#ea580c)"></button>
+              <button type="button" class="color-dot" data-color="#14b8a6" style="--dot-color: #14b8a6;" title="Teal (#14b8a6)"></button>
+            </div>
+            <div class="custom-picker-row">
+              <label for="custom-accent-color-input" class="custom-color-btn-wrapper" title="Click to open full color spectrum">
+                <input type="color" id="custom-accent-color-input" value="#6366f1">
+                <span class="color-preview-circle" id="custom-color-preview-circle" style="background-color: #6366f1;"></span>
+                <span>Color Spectrum</span>
+              </label>
+              <div class="hex-input-group">
+                <span class="hex-prefix">#</span>
+                <input type="text" id="custom-accent-hex-input" class="hex-input" value="6366f1" maxlength="6" placeholder="6366f1" aria-label="Custom Hex Code">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Background Style -->
+        <div class="theme-section">
+          <div class="theme-section-title-wrap">
+            <h4 class="theme-section-title">Background Style</h4>
+            <p class="theme-section-desc">Select visual ambient depth and backdrop texture</p>
+          </div>
+          <div class="bg-styles-grid" role="radiogroup" aria-label="Background Style">
+            <button type="button" class="bg-style-card active" data-bg="orbs" role="radio" aria-checked="true">
+              <div class="bg-style-preview preview-style-orbs">
+                <span class="mini-orb mini-orb-1"></span>
+                <span class="mini-orb mini-orb-2"></span>
+              </div>
+              <span class="bg-style-name">Glowing Orbs</span>
+              <span class="bg-style-desc">Dynamic floating spheres</span>
+            </button>
+
+            <button type="button" class="bg-style-card" data-bg="mesh" role="radio" aria-checked="false">
+              <div class="bg-style-preview preview-style-mesh"></div>
+              <span class="bg-style-name">Subtle Mesh</span>
+              <span class="bg-style-desc">Smooth atmospheric gradient</span>
+            </button>
+
+            <button type="button" class="bg-style-card" data-bg="dots" role="radio" aria-checked="false">
+              <div class="bg-style-preview preview-style-dots"></div>
+              <span class="bg-style-name">Geometric Dots</span>
+              <span class="bg-style-desc">Clean dot-matrix grid</span>
+            </button>
+
+            <button type="button" class="bg-style-card" data-bg="clean" role="radio" aria-checked="false">
+              <div class="bg-style-preview preview-style-clean"></div>
+              <span class="bg-style-name">Clean Minimal</span>
+              <span class="bg-style-desc">Distraction-free solid</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 5: Distinguishable Task Status Reference -->
+        <div class="theme-section">
+          <div class="theme-section-title-wrap">
+            <h4 class="theme-section-title">Distinguishable Task Status Indicators</h4>
+            <p class="theme-section-desc">Consistent visual hierarchy across all appearance modes</p>
+          </div>
+          <div class="status-samples-grid">
+            <div class="status-sample-card">
+              <span class="badge-pill badge-status badge-status-pending">
+                <span class="status-icon">⏱️</span> Pending
+              </span>
+              <span class="status-sample-caption">Not started yet</span>
+            </div>
+            <div class="status-sample-card">
+              <span class="badge-pill badge-status badge-status-inprogress">
+                <span class="status-icon">🔄</span> In Progress
+              </span>
+              <span class="status-sample-caption">Subtasks / Due Today</span>
+            </div>
+            <div class="status-sample-card">
+              <span class="badge-pill badge-status badge-status-completed">
+                <span class="status-icon">✅</span> Completed
+              </span>
+              <span class="status-sample-caption">Task accomplished</span>
+            </div>
+            <div class="status-sample-card">
+              <span class="badge-pill badge-status badge-status-overdue">
+                <span class="status-icon">⚠️</span> Overdue
+              </span>
+              <span class="status-sample-caption">Past scheduled due date</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions theme-modal-actions">
+        <button type="button" id="reset-theme-btn" class="secondary-btn text-muted" title="Restore default TaskFlow Indigo appearance">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+          Reset Defaults
+        </button>
+        <div class="modal-actions-right">
+          <button type="button" id="cancel-theme-btn" class="secondary-btn">Cancel</button>
+          <button type="button" id="save-theme-btn" class="primary-gradient-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Apply Theme
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification System -->
   <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+  <!-- Floating Action Button for Mobile Quick Task Add -->
+  <button id="mobile-add-fab" class="mobile-add-fab hidden-fab" aria-label="Add New Task" title="Create New Task">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </button>
 
   <script src="app.js"></script>
 </body>
